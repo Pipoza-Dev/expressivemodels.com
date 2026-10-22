@@ -9,6 +9,14 @@
  */
 
 function initAdminDashboardApp() {
+  // --- CLEAN PRETTY URLS (STRIP .html EXTENSION ON HTTP/HTTPS SERVERS) ---
+  try {
+    if (window.location.protocol.startsWith('http') && window.location.pathname.endsWith('.html')) {
+      const cleanPath = window.location.pathname.replace(/\/admin\.html$/, '/admin').replace(/\.html$/, '');
+      const newUrl = cleanPath + window.location.search + window.location.hash;
+      window.history.replaceState(null, '', newUrl);
+    }
+  } catch (e) {}
   // --- 1. GLOBAL STATE & DATA STORES (DECLARED FIRST) ---
   const DEFAULT_CATEGORIES = [
     { id: 'CAT-bdeb87f8', name: 'Building Models', slug: 'building-models', description: 'Architectural scale replicas of commercial towers, residential townships, and institutional campuses.' },
@@ -19,92 +27,8 @@ function initAdminDashboardApp() {
     { id: 'CAT-dfa27f9e', name: '3D Printing', slug: '3d-printing', description: 'State-of-the-art SLA and FDM 3D printing services, rapid prototyping, and 3D scanning in Mumbai.' }
   ];
 
-  const DEFAULT_CLIENT_PROJECTS = [
-    {
-      id: 'PRJ-BLD-01',
-      title: 'Commercial High-Rise Tower & Retail Podium',
-      category: 'building-models',
-      categoryId: 'CAT-bdeb87f8',
-      categoryName: 'Building Models',
-      categorySlug: 'building-models',
-      description: 'Precision architectural scale model featuring CNC-milled acrylic curtain walls, dynamic interior floor lighting zones, landscaped public plaza, and illuminated podium canopy.',
-      mediaUrl: 'model_building.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_building.jpg', caption: 'Front Elevation & Podium Plaza' }, { url: 'model_architectural.jpg', caption: 'Masterplan Context View' }],
-      client: 'Lodha Group Mumbai',
-      createdAt: '2026-03-12T10:00:00.000Z'
-    },
-    {
-      id: 'PRJ-PLT-02',
-      title: 'Petrochemical Refinery & Industrial Complex',
-      category: 'plant-models',
-      categoryId: 'CAT-79ebe2f6',
-      categoryName: 'Plant Models',
-      categorySlug: 'plant-models',
-      description: 'Comprehensive industrial refinery scale model including distillation towers, color-coded process piping networks, tank farms, cooling stacks, and structural steel truss walkways.',
-      mediaUrl: 'model_plant.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_plant.jpg', caption: 'Full Complex Process Layout' }],
-      client: 'Reliance Industries / BPCL',
-      createdAt: '2026-03-05T14:30:00.000Z'
-    },
-    {
-      id: 'PRJ-MCH-03',
-      title: 'Heavy Industry Turbine & Precision Power Train',
-      category: 'machine-models',
-      categoryId: 'CAT-6858a1c4',
-      categoryName: 'Machine Models',
-      categorySlug: 'machine-models',
-      description: 'Engineering cutaway demonstration model built with brass and laser-sintered polymer components showing rotor dynamics, internal bearing blocks, and mechanical drivetrain.',
-      mediaUrl: 'model_machine.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_machine.jpg', caption: 'Precision Internal Cutaway Detail' }],
-      client: 'Larsen & Toubro Heavy Engineering',
-      createdAt: '2026-02-20T11:15:00.000Z'
-    },
-    {
-      id: 'PRJ-MIN-04',
-      title: 'Themed Waterfront Resort & Island Diorama',
-      category: 'miniature-models',
-      categoryId: 'CAT-780e8f84',
-      categoryName: 'Miniature Models',
-      categorySlug: 'miniature-models',
-      description: 'Handcrafted scenic diorama utilizing crystal-clear epoxy water effects, botanical topography, handcrafted resort villas, ambient shoreline illumination, and scale maritime vessels.',
-      mediaUrl: 'model_miniature.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_miniature.jpg', caption: 'Waterfront Lagoon & Island Villas' }],
-      client: 'Oberoi Realty Hospitality',
-      createdAt: '2026-02-14T09:45:00.000Z'
-    },
-    {
-      id: 'PRJ-INT-05',
-      title: 'Bespoke Penthouse & Commercial Cutaway Interior',
-      category: 'building-models',
-      categoryId: 'CAT-bdeb87f8',
-      categoryName: 'Building Models',
-      categorySlug: 'building-models',
-      description: 'Fully furnished architectural interior model displaying scale modern furniture, textured flooring materials, ambient micro-LED downlighting, and spatial volume planning.',
-      mediaUrl: 'model_interior.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_interior.jpg', caption: 'Furnished Cutaway Interior Volume' }],
-      client: 'Piramal Realty Design Studio',
-      createdAt: '2026-01-08T15:10:00.000Z'
-    },
-    {
-      id: 'PRJ-ARC-06',
-      title: 'Civic Institutional University Campus Masterplan',
-      category: 'building-models',
-      categoryId: 'CAT-bdeb87f8',
-      categoryName: 'Building Models',
-      categorySlug: 'building-models',
-      description: 'Comprehensive 80-acre educational campus master plan featuring academic faculties, student housing complexes, sports infrastructure, solar array canopies, and perimeter transit roads.',
-      mediaUrl: 'model_architectural.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_architectural.jpg', caption: 'Institutional Masterplan Overview' }],
-      client: 'IIT Bombay Infrastructure Division',
-      createdAt: '2025-12-18T10:30:00.000Z'
-    }
-  ];
+  // Studio Gallery Projects (Empty by default: user adds manually via Admin Panel or Google Sheets)
+  const DEFAULT_CLIENT_PROJECTS = [];
 
   const DEFAULT_CLIENT_FEEDBACK = [
     {
@@ -268,16 +192,16 @@ function initAdminDashboardApp() {
     }
 
     const icons = {
-      success: '✅',
-      error: '❌',
-      warning: '⚠️',
-      info: 'ℹ️'
+      success: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+      error: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+      warning: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+      info: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C41E3A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
     };
 
     const toast = document.createElement('div');
     toast.className = `admin-toast admin-toast-${type}`;
     toast.innerHTML = `
-      <span class="admin-toast-icon">${icons[type] || 'ℹ️'}</span>
+      <span class="admin-toast-icon" style="display:inline-flex; align-items:center;">${icons[type] || icons.info}</span>
       <span class="admin-toast-msg">${message}</span>
     `;
 
@@ -448,6 +372,8 @@ function initAdminDashboardApp() {
           : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
       }
     });
+
+
   }
 
   // --- ALERT & ANIMATION HELPERS ---
@@ -539,8 +465,24 @@ function initAdminDashboardApp() {
     const cleanEmail = (email || '').toLowerCase().trim();
     const isOwner = cleanEmail === 'expressivemodel@gmail.com';
     const isDev = cleanEmail === 'mandalpiush720@gmail.com';
-    const displayName = isOwner ? 'Mustafa Rampurawala' : (isDev ? 'Piush Mandal' : (cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Studio Staff'));
-    const displayRole = isOwner ? 'Company Owner' : (isDev ? 'Lead Developer' : 'Worker / Staff');
+
+    let workerMatch = null;
+    if (window.fallbackUser && window.fallbackUser.email && window.fallbackUser.email.toLowerCase() === cleanEmail) {
+      workerMatch = window.fallbackUser;
+    } else {
+      let wList = adminWorkers;
+      if (!wList || wList.length === 0) {
+        try {
+          const saved = localStorage.getItem('emm_workers');
+          if (saved) wList = JSON.parse(saved);
+        } catch (e) {}
+      }
+      workerMatch = (wList || []).find(w => w.email && w.email.toLowerCase() === cleanEmail);
+    }
+
+    const displayName = (workerMatch && workerMatch.name) || (isOwner ? 'Mustafa Rampurawala' : (isDev ? 'Piush Mandal' : (cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Studio Staff')));
+    const displayRole = (workerMatch && (workerMatch.designation || (workerMatch.role === 'owner' ? 'Company Owner' : (workerMatch.role === 'developer' ? 'Lead Systems Architect & Developer' : 'Studio Staff')))) || (isOwner ? 'Company Owner' : (isDev ? 'Lead Developer' : 'Studio Staff'));
+    const avatarUrl = (workerMatch && workerMatch.avatarUrl) || (isOwner ? 'Owner_Mustafa_Rampurawala.jpg' : (isDev ? 'Company_Logo_Icon.png' : ''));
 
     const nameEl = document.getElementById('unlockingName');
     const emailEl = document.getElementById('unlockingEmail');
@@ -551,10 +493,8 @@ function initAdminDashboardApp() {
     if (emailEl) emailEl.textContent = cleanEmail || 'expressivemodel@gmail.com';
     if (badgeEl) badgeEl.textContent = displayRole;
     if (avatarEl) {
-      if (isOwner) {
-        avatarEl.innerHTML = `<img src="Owner_Mustafa_Rampurawala.jpg" alt="Mustafa" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-      } else if (isDev) {
-        avatarEl.innerHTML = `<div style="width:100%; height:100%; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.15rem;">P</div>`;
+      if (avatarUrl) {
+        avatarEl.innerHTML = `<img src="${avatarUrl}" alt="${displayName}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'width:100%; height:100%; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.15rem;\\'>${displayName.charAt(0).toUpperCase()}</div>';">`;
       } else {
         avatarEl.innerHTML = `<div style="width:100%; height:100%; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.15rem;">${displayName.charAt(0).toUpperCase()}</div>`;
       }
@@ -695,6 +635,18 @@ function initAdminDashboardApp() {
         triggerCardShake('adminAuthCard');
       }
     });
+
+    const adminEmailInput = document.getElementById('adminEmail');
+    if (adminEmailInput) {
+      adminEmailInput.addEventListener('blur', () => {
+        const val = adminEmailInput.value.trim();
+        if (val) updateUnlockingProfile(val);
+      });
+      adminEmailInput.addEventListener('input', () => {
+        const val = adminEmailInput.value.trim();
+        if (val && val.includes('@')) updateUnlockingProfile(val);
+      });
+    }
   }
 
   // --- 3. STEP 2: 6-DIGIT PIN VERIFICATION (AUTO-ADVANCE, PASTE & AUTO-SUBMIT) ---
@@ -754,6 +706,8 @@ function initAdminDashboardApp() {
         pinDigits[digitsOnly.length].focus();
       }
     });
+
+
   });
 
   if (adminPinForm) {
@@ -879,6 +833,8 @@ function initAdminDashboardApp() {
         triggerCardShake('adminPinCard');
       }
     });
+
+
   }
 
   // --- 4. DASHBOARD INITIALIZATION & NAVIGATION ---
@@ -892,14 +848,20 @@ function initAdminDashboardApp() {
     loadAdminWorkers();
     initPushNotifications();
 
-    // Switch to saved default tab if configured
-    const preferredTab = localStorage.getItem('emm_pref_tab');
-    if (preferredTab && preferredTab !== 'overview') {
-      const tabEl = document.querySelector(`.admin-nav-item[data-tab="${preferredTab}"]`);
-      if (tabEl && tabEl.style.display !== 'none') {
-        tabEl.click();
+    // Switch to saved default tab if configured (or Reviews on Mobile)
+    if (isMobileAdmin()) {
+      const feedbackTabBtn = document.querySelector('.admin-nav-item[data-tab="feedback"]');
+      if (feedbackTabBtn) feedbackTabBtn.click();
+    } else {
+      const preferredTab = localStorage.getItem('emm_pref_tab');
+      if (preferredTab && preferredTab !== 'overview') {
+        const tabEl = document.querySelector(`.admin-nav-item[data-tab="${preferredTab}"]`);
+        if (tabEl && tabEl.style.display !== 'none') {
+          tabEl.click();
+        }
       }
     }
+    updateMobileAdminRestrictions();
   }
 
   if (adminLogoutBtn) {
@@ -917,10 +879,104 @@ function initAdminDashboardApp() {
     });
   }
 
+  // --- PC-ONLY MOBILE POLICY HELPERS & MODALS ---
+  const pcOnlyModal = document.getElementById('pcOnlyModal');
+  const btnStayOnFeedbackModal = document.getElementById('btnStayOnFeedbackModal');
+  const btnClosePcOnlyModal = document.getElementById('btnClosePcOnlyModal');
+  const adminMobileNoticeBanner = document.getElementById('adminMobileNoticeBanner');
+
+  function isMobileAdmin() {
+    return window.innerWidth < 992;
+  }
+
+  function openPcOnlyModal(intendedTab) {
+    if (pcOnlyModal) {
+      pcOnlyModal.classList.add('open');
+    } else {
+      showAdminToast('Desktop computer required for full studio operations. Only Client Reviews are available on mobile.', 'warning');
+    }
+  }
+
+  function closePcOnlyModal() {
+    if (pcOnlyModal) {
+      pcOnlyModal.classList.remove('open');
+    }
+  }
+
+  if (btnStayOnFeedbackModal) {
+    btnStayOnFeedbackModal.addEventListener('click', () => {
+      closePcOnlyModal();
+      const feedbackTabBtn = document.querySelector('.admin-nav-item[data-tab="feedback"]');
+      if (feedbackTabBtn) {
+        feedbackTabBtn.click();
+      }
+      if (window.innerWidth <= 1024) {
+        closeSidebarDrawer();
+      }
+    });
+  }
+
+  if (btnClosePcOnlyModal) {
+    btnClosePcOnlyModal.addEventListener('click', () => {
+      closePcOnlyModal();
+    });
+  }
+
+  function updateMobileAdminRestrictions() {
+    const isMobile = isMobileAdmin();
+    if (adminMobileNoticeBanner) {
+      adminMobileNoticeBanner.style.display = isMobile ? 'block' : 'none';
+    }
+
+    adminNavItems.forEach(item => {
+      const tabName = item.getAttribute('data-tab');
+      let pill = item.querySelector('.pc-only-lock-pill');
+
+      if (isMobile && tabName !== 'feedback') {
+        item.classList.add('mobile-locked-tab');
+        if (!pill) {
+          pill = document.createElement('span');
+          pill.className = 'pc-only-lock-pill';
+          pill.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> PC Only`;
+          item.appendChild(pill);
+        }
+      } else {
+        item.classList.remove('mobile-locked-tab');
+        if (pill) {
+          pill.remove();
+        }
+      }
+    });
+
+    if (isMobile) {
+      const activeItem = document.querySelector('.admin-nav-item.active');
+      const activeTabName = activeItem ? activeItem.getAttribute('data-tab') : null;
+      if (activeTabName && activeTabName !== 'feedback') {
+        const feedbackTabBtn = document.querySelector('.admin-nav-item[data-tab="feedback"]');
+        if (feedbackTabBtn) {
+          feedbackTabBtn.click();
+        }
+      }
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    updateMobileAdminRestrictions();
+  });
+
   // Tab Switching
   adminNavItems.forEach(item => {
-    item.addEventListener('click', () => {
+    item.addEventListener('click', (e) => {
       const targetTab = item.getAttribute('data-tab');
+
+      // Restrict all non-feedback tabs to PC screens (>= 992px)
+      if (isMobileAdmin() && targetTab !== 'feedback') {
+        e.preventDefault();
+        e.stopPropagation();
+        openPcOnlyModal(targetTab);
+        return;
+      }
+
       adminNavItems.forEach(i => i.classList.remove('active'));
       adminTabContents.forEach(c => c.classList.remove('active'));
 
@@ -1052,7 +1108,7 @@ function initAdminDashboardApp() {
     const canExport = hasPerm('export_data');
     const expCsvBtn = document.getElementById('exportInquiriesCsvBtn');
     const expJsonBtn = document.getElementById('exportCatalogJsonBtn');
-    const expGraphBtn = document.getElementById('exportGraphBtn');
+    const expGraphBtn = document.getElementById('openExportGraphModalBtn') || document.getElementById('exportGraphBtn');
     if (expCsvBtn) expCsvBtn.style.display = canExport ? 'inline-flex' : 'none';
     if (expJsonBtn) expJsonBtn.style.display = canExport ? 'inline-flex' : 'none';
     if (expGraphBtn) expGraphBtn.style.display = canExport ? 'inline-flex' : 'none';
@@ -1062,13 +1118,16 @@ function initAdminDashboardApp() {
     if (devSection) {
       devSection.style.display = isDev ? 'block' : 'none';
     }
+
+    // 5. Apply Mobile Admin Policy (Reviews moderation only on mobile)
+    updateMobileAdminRestrictions();
   }
 
   // --- 5. TAB: OVERVIEW & HIGH-POWERED ANALYTICS (DYNAMIC TIME PERIODS & SVG CHARTS) ---
   let activeAnalyticsPeriod = '7d';
   let currentGraphType = 'area';
 
-  // Dynamic real data generator strictly from October 1st, 2026 (No false/mock data, 0 if 0)
+  // Dynamic real data generator strictly from October 1st, 2026 to Today (No false/mock data, 0 if 0)
   function getPeriodDataset(periodKey) {
     let pvMap = {};
     try {
@@ -1084,38 +1143,63 @@ function initAdminDashboardApp() {
       }
     });
 
-    let startDay = 1;
-    let endDay = 15;
-    let periodLabel = 'All Time (From 1st Oct 2026)';
+    const now = new Date();
+    // Strictly baseline from Oct 1, 2026
+    const oct1 = new Date(2026, 9, 1); // Month 9 is October
+    const today = now < oct1 ? oct1 : now;
+
+    let startDate;
+    let periodLabel = '';
+
     if (periodKey === '7d') {
-      startDay = 9;
-      periodLabel = 'Last 7 Days (Oct 09 – 15, 2026)';
+      startDate = new Date(today);
+      startDate.setDate(today.getDate() - 6);
+      if (startDate < oct1) startDate = new Date(oct1);
+      const sStr = startDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      const eStr = today.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      periodLabel = `Last 7 Days (${sStr} – ${eStr})`;
     } else if (periodKey === '14d') {
-      startDay = 2;
-      periodLabel = 'Last 14 Days (Oct 02 – 15, 2026)';
+      startDate = new Date(today);
+      startDate.setDate(today.getDate() - 13);
+      if (startDate < oct1) startDate = new Date(oct1);
+      const sStr = startDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      const eStr = today.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      periodLabel = `Last 14 Days (${sStr} – ${eStr})`;
+    } else { // 'all'
+      startDate = new Date(oct1);
+      const eStr = today.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      periodLabel = `All Time (Oct 01 – ${eStr})`;
     }
 
     const chartData = [];
     let totalPv = 0;
     let totalInq = 0;
 
-    for (let day = startDay; day <= endDay; day++) {
-      const dayStr = day < 10 ? `0${day}` : `${day}`;
-      const dateKey = `2026-10-${dayStr}`;
+    let cur = new Date(startDate);
+    while (cur <= today) {
+      const yyyy = cur.getFullYear();
+      const mm = String(cur.getMonth() + 1).padStart(2, '0');
+      const dd = String(cur.getDate()).padStart(2, '0');
+      const dateKey = `${yyyy}-${mm}-${dd}`;
       const dayPv = Number(pvMap[dateKey]) || 0;
       const dayInq = Number(inqMap[dateKey]) || 0;
 
       totalPv += dayPv;
       totalInq += dayInq;
 
+      const mName = cur.toLocaleDateString('en-US', { month: 'short' });
+      const fullDate = cur.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
       chartData.push({
-        day: day,
+        day: cur.getDate(),
         dateKey: dateKey,
-        label: `Oct ${dayStr}`,
-        date: `October ${dayStr}, 2026`,
+        label: `${mName} ${dd}`,
+        date: fullDate,
         pageviews: dayPv, // Real value: 0 if 0
         inquiries: dayInq // Real value: 0 if 0
       });
+
+      cur.setDate(cur.getDate() + 1);
     }
 
     return {
@@ -1131,6 +1215,14 @@ function initAdminDashboardApp() {
 
   function renderAnalyticsUI(period = '7d') {
     const pData = getPeriodDataset(period);
+
+    // Dynamically update the time period selector pill labels to match today's real dates
+    const pill7 = document.querySelector('.period-pill[data-period="7d"]');
+    const pill14 = document.querySelector('.period-pill[data-period="14d"]');
+    const pillAll = document.querySelector('.period-pill[data-period="all"]');
+    if (pill7) pill7.textContent = getPeriodDataset('7d').label;
+    if (pill14) pill14.textContent = getPeriodDataset('14d').label;
+    if (pillAll) pillAll.textContent = getPeriodDataset('all').label;
 
     // Update KPI Counters (Strictly Real Values — Show 0 if 0)
     const pvEl = document.getElementById('statTotalPageviews');
@@ -1209,8 +1301,8 @@ function initAdminDashboardApp() {
 
     const totalDemandCount = catCounts.arch + catCounts.plant + catCounts.mach + catCounts.mini + catCounts.mon;
     const maxDemand = Math.max(catCounts.arch, catCounts.plant, catCounts.mach, catCounts.mini, catCounts.mon, 1);
-    const getPct = (c) => totalDemandCount > 0 ? Math.round((c / totalDemandCount) * 100) : 0;
-    const getBar = (c) => Math.max(Math.round((c / maxDemand) * 100), 10);
+    const getPct = (c) => (totalDemandCount > 0 && c > 0) ? Math.round((c / totalDemandCount) * 100) : 0;
+    const getBar = (c) => (totalDemandCount > 0 && maxDemand > 0 && c > 0) ? Math.round((c / maxDemand) * 100) : 0;
 
     const archPct = document.getElementById('demandArchPct');
     const archBar = document.getElementById('demandArchBar');
@@ -1676,6 +1768,8 @@ function initAdminDashboardApp() {
         loadAdminFeedback();
       }
     });
+
+
   }
 
   function sendPushAlert(title, body) {
@@ -1781,8 +1875,8 @@ function initAdminDashboardApp() {
     const resMultiplier = parseFloat(document.getElementById('exportGraphResolutionSelect')?.value || '1.5');
     const bgTheme = document.getElementById('exportGraphBgSelect')?.value || 'dark';
     const graphStyle = document.getElementById('exportGraphStyleSelect')?.value || currentGraphType || 'area';
-    const userTitle = document.getElementById('exportGraphTitleInput')?.value || 'EXPRESSIVE MODEL MAKING CO. — STUDIO OPERATIONS ANALYTICS';
-    const userSub = document.getElementById('exportGraphSubInput')?.value || 'October 01 – 15, 2026 • Verified Studio Metric Performance';
+    const userTitle = document.getElementById('exportGraphTitleInput')?.value || 'EXPRESSIVE MODEL MAKING CO., MUMBAI — STUDIO OPERATIONS ANALYTICS';
+    const userSub = document.getElementById('exportGraphSubInput')?.value || 'From October 01, 2026 to Today • Verified Studio Metric Performance';
 
     const incKpi = document.getElementById('exportOptKpi')?.checked !== false;
     const incGrid = document.getElementById('exportOptGrid')?.checked !== false;
@@ -1874,7 +1968,8 @@ function initAdminDashboardApp() {
     // Timestamp Pill
     if (incTimestamp) {
       ctx.save();
-      const timeStr = "DATE: 2026-10-15 • MUMBAI HQ";
+      const ymdNow = new Date().toISOString().slice(0, 10);
+      const timeStr = `DATE: ${ymdNow} • MUMBAI HQ`;
       ctx.font = `600 ${11 * s}px monospace`;
       const timeW = ctx.measureText(timeStr).width + (24 * s);
       const timeX = w - marginX - timeW;
@@ -2241,7 +2336,7 @@ function initAdminDashboardApp() {
         document.body.removeChild(link);
       }, 200);
 
-      showAdminToast('Overpowered Studio Analytics Infographic Exported (JPEG)!', 'success');
+      showAdminToast('Studio Analytics Infographic Exported (JPEG)!', 'success');
       closeGraphExportModal();
     } catch (err) {
       console.error("Canvas export error:", err);
@@ -2370,31 +2465,93 @@ function initAdminDashboardApp() {
     });
   }
 
+  let selectedProjectIds = new Set();
+  let adminProjectsListenersBound = false;
+
   function renderAdminProjectsTable() {
     const tbody = document.getElementById('adminProjectsTableBody');
     if (!tbody) return;
     tbody.innerHTML = '';
 
     const canManage = hasPerm('gallery_manage');
+    const searchQuery = (document.getElementById('adminProjectSearchInput')?.value || '').trim().toLowerCase();
+    const catFilter = document.getElementById('adminProjectCategoryFilter')?.value || 'all';
+    const sortVal = document.getElementById('adminProjectSortSelect')?.value || 'newest';
 
-    if (adminProjects.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 36px 20px; color: var(--text-muted);">
-        <div style="font-size:1.05rem; font-weight:600; color:var(--text); margin-bottom:6px;">Studio Gallery Catalog Ready</div>
-        <p style="margin-bottom:16px; font-size:0.9rem;">The gallery is completely clean and ready. Click below to upload your first scale model project with photos/videos, details, and live catalog publishing.</p>
-        ${canManage ? `
-          <button type="button" class="btn-primary" onclick="document.getElementById('openUploadPrjModalBtn')?.click()" style="padding:8px 20px;">
-            + Upload First Scale Model
-          </button>
-        ` : ''}
-      </td></tr>`;
+    let displayList = [...adminProjects];
+
+    // Filter by Category
+    if (catFilter && catFilter !== 'all') {
+      displayList = displayList.filter(p => 
+        p.categoryId === catFilter || 
+        p.categorySlug === catFilter || 
+        (p.categoryName && p.categoryName.toLowerCase() === catFilter.toLowerCase())
+      );
+    }
+
+    // Filter by Search Query
+    if (searchQuery) {
+      displayList = displayList.filter(p => {
+        const title = (p.title || '').toLowerCase();
+        const desc = (p.description || '').toLowerCase();
+        const cat = (p.categoryName || '').toLowerCase();
+        const client = (p.client || '').toLowerCase();
+        const id = (p.id || '').toLowerCase();
+        return title.includes(searchQuery) || desc.includes(searchQuery) || cat.includes(searchQuery) || client.includes(searchQuery) || id.includes(searchQuery);
+      });
+    }
+
+    // Sort
+    if (sortVal === 'oldest') {
+      displayList.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+    } else if (sortVal === 'title-asc') {
+      displayList.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+    } else if (sortVal === 'title-desc') {
+      displayList.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+    } else if (sortVal === 'category') {
+      displayList.sort((a, b) => (a.categoryName || '').localeCompare(b.categoryName || ''));
+    } else { // 'newest'
+      displayList.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    }
+
+    // Update Master Checkbox & Batch Toolbar
+    const masterCheck = document.getElementById('selectAllProjectsCheck');
+    const batchBtn = document.getElementById('btnBatchDeleteProjects');
+    const batchText = document.getElementById('batchDeleteProjectsText');
+
+    if (displayList.length === 0) {
+      if (adminProjects.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 36px 20px; color: var(--text-muted);">
+          <div style="font-size:1.05rem; font-weight:600; color:var(--text); margin-bottom:6px;">Studio Gallery Catalog Ready</div>
+          <p style="margin-bottom:16px; font-size:0.9rem;">The gallery is completely clean and ready. Click below to upload your first scale model project with photos/videos, details, and live catalog publishing.</p>
+          ${canManage ? `
+            <button type="button" class="btn-primary" onclick="document.getElementById('openUploadPrjModalBtn')?.click()" style="padding:8px 20px;">
+              + Upload First Scale Model
+            </button>
+          ` : ''}
+        </td></tr>`;
+      } else {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 28px 20px; color: var(--text-muted);">
+          No projects match your filter. <button type="button" class="btn-secondary" style="padding:4px 10px; font-size:0.8rem; margin-left:8px;" onclick="const si=document.getElementById('adminProjectSearchInput'); if(si) si.value=''; const cf=document.getElementById('adminProjectCategoryFilter'); if(cf) cf.value='all'; renderAdminProjectsTable();">Reset Filters</button>
+        </td></tr>`;
+      }
+      if (masterCheck) {
+        masterCheck.checked = false;
+        masterCheck.indeterminate = false;
+      }
+      if (batchBtn) batchBtn.style.display = 'none';
       return;
     }
 
-    adminProjects.forEach(prj => {
+    displayList.forEach(prj => {
+      const isChecked = selectedProjectIds.has(prj.id);
       const localMatch = DEFAULT_CLIENT_PROJECTS.find(p => p.title === prj.title || p.id === prj.id);
       const fallbackSrc = localMatch ? localMatch.mediaUrl : (prj.driveFileId ? `https://drive.google.com/thumbnail?id=${prj.driveFileId}&sz=w200` : 'Favicon.png');
       const tr = document.createElement('tr');
       tr.innerHTML = `
+        <td style="width:36px; text-align:center;">
+          <input type="checkbox" class="project-row-check" data-id="${prj.id}" ${isChecked ? 'checked' : ''} style="cursor:pointer;" title="Select Project">
+        </td>
         <td style="width: 60px;">
           <img src="${prj.mediaUrl}" referrerpolicy="no-referrer" style="width: 50px; height: 40px; object-fit: cover; border-radius: 6px;" onerror="if(!this.dataset.retried){this.dataset.retried='1'; this.src='${fallbackSrc}';}else{this.src='Favicon.png';}" />
         </td>
@@ -2403,18 +2560,122 @@ function initAdminDashboardApp() {
         <td><span style="text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">${prj.mediaType || 'image'}</span></td>
         <td style="text-align: right; white-space: nowrap;">
           <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 6px;" onclick="window.previewProjectMedia('${prj.id}')">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             <span>Preview</span>
           </button>
           ${canManage ? `
-            <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 6px;" onclick="window.editProjectMedia('${prj.id}')">✏️ Edit</button>
-            <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; color: #EF4444;" onclick="window.deleteProjectMedia('${prj.id}')">🗑️ Delete</button>
+            <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 6px;" onclick="window.editProjectMedia('${prj.id}')">Edit</button>
+            <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; color: #EF4444;" onclick="window.deleteProjectMedia('${prj.id}')">Delete</button>
           ` : ''}
         </td>
       `;
       tbody.appendChild(tr);
     });
+
+    if (masterCheck) {
+      const visibleIds = displayList.map(p => p.id);
+      const allSelected = visibleIds.length > 0 && visibleIds.every(id => selectedProjectIds.has(id));
+      const someSelected = visibleIds.some(id => selectedProjectIds.has(id));
+      masterCheck.checked = allSelected;
+      masterCheck.indeterminate = !allSelected && someSelected;
+    }
+
+    if (batchBtn) {
+      batchBtn.style.display = selectedProjectIds.size > 0 ? 'inline-flex' : 'none';
+      if (batchText) {
+        batchText.textContent = `Delete Selected (${selectedProjectIds.size})`;
+      }
+    }
+
+    tbody.querySelectorAll('.project-row-check').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const id = e.target.getAttribute('data-id');
+        if (e.target.checked) {
+          selectedProjectIds.add(id);
+        } else {
+          selectedProjectIds.delete(id);
+        }
+        renderAdminProjectsTable();
+      });
+    });
+
+    if (!adminProjectsListenersBound) {
+      adminProjectsListenersBound = true;
+
+      document.getElementById('adminProjectSearchInput')?.addEventListener('input', () => {
+        renderAdminProjectsTable();
+      });
+
+      document.getElementById('adminProjectCategoryFilter')?.addEventListener('change', () => {
+        renderAdminProjectsTable();
+      });
+
+      document.getElementById('adminProjectSortSelect')?.addEventListener('change', () => {
+        renderAdminProjectsTable();
+      });
+
+      document.getElementById('selectAllProjectsCheck')?.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        const currentSearch = (document.getElementById('adminProjectSearchInput')?.value || '').trim().toLowerCase();
+        const currentCat = document.getElementById('adminProjectCategoryFilter')?.value || 'all';
+        let currentVisible = [...adminProjects];
+        if (currentCat && currentCat !== 'all') {
+          currentVisible = currentVisible.filter(p => p.categoryId === currentCat || p.categorySlug === currentCat || (p.categoryName && p.categoryName.toLowerCase() === currentCat.toLowerCase()));
+        }
+        if (currentSearch) {
+          currentVisible = currentVisible.filter(p => (p.title || '').toLowerCase().includes(currentSearch) || (p.description || '').toLowerCase().includes(currentSearch) || (p.id || '').toLowerCase().includes(currentSearch));
+        }
+
+        currentVisible.forEach(p => {
+          if (isChecked) {
+            selectedProjectIds.add(p.id);
+          } else {
+            selectedProjectIds.delete(p.id);
+          }
+        });
+        renderAdminProjectsTable();
+      });
+
+      document.getElementById('btnBatchDeleteProjects')?.addEventListener('click', () => {
+        window.deleteBatchProjects();
+      });
+    }
   }
+
+  window.deleteBatchProjects = async function () {
+    if (selectedProjectIds.size === 0) return;
+    const count = selectedProjectIds.size;
+    if (!confirm(`Are you sure you want to permanently delete ${count} selected scale model project${count > 1 ? 's' : ''}? This will remove them from the public website gallery.`)) return;
+
+    const idsToDelete = Array.from(selectedProjectIds);
+
+    // Optimistic local deletion (0ms)
+    try {
+      const deleted = JSON.parse(localStorage.getItem('emm_deleted_projects') || '[]');
+      idsToDelete.forEach(id => {
+        if (!deleted.includes(id)) deleted.push(id);
+      });
+      localStorage.setItem('emm_deleted_projects', JSON.stringify(deleted));
+    } catch (e) {}
+
+    adminProjects = adminProjects.filter(p => !idsToDelete.includes(p.id));
+    localStorage.setItem('emm_projects', JSON.stringify(adminProjects));
+    selectedProjectIds.clear();
+    window.dispatchEvent(new Event('storage'));
+    renderAdminProjectsTable();
+    showAdminToast(`${count} project${count > 1 ? 's' : ''} deleted from studio portfolio.`, 'info');
+
+    // Background sync to Google Apps Script
+    const sess = API.getSession();
+    const token = sess ? sess.token : '';
+    for (const id of idsToDelete) {
+      try {
+        await API.request({ action: 'delete_project_media', token: token, id: id });
+      } catch (err) {
+        console.warn(`Backend delete note for project ${id}:`, err);
+      }
+    }
+  };
 
   window.previewProjectMedia = function (id) {
     const prj = adminProjects.find(p => p.id === id);
@@ -2473,18 +2734,41 @@ function initAdminDashboardApp() {
 
   function populateProjectCategoryDropdown() {
     const sel = document.getElementById('prjUploadCategory');
-    if (!sel) return;
-    sel.innerHTML = '<option value="">-- Select Category --</option>';
-    adminCategories.forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat.id;
-      opt.textContent = cat.name;
-      opt.setAttribute('data-name', cat.name);
-      sel.appendChild(opt);
-    });
-  }
-
-  // Create Category Modal & Form
+    const bulkSel = document.getElementById('bulkUploadCategory');
+    const filterSel = document.getElementById('adminProjectCategoryFilter');
+    if (sel) {
+      sel.innerHTML = '<option value="">-- Select Category --</option>';
+      adminCategories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.id;
+        opt.textContent = cat.name;
+        opt.setAttribute('data-name', cat.name);
+        sel.appendChild(opt);
+      });
+    }
+    if (bulkSel) {
+      bulkSel.innerHTML = '<option value="">-- Select Category for All Batch Photos --</option>';
+      adminCategories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.id;
+        opt.textContent = cat.name;
+        opt.setAttribute('data-name', cat.name);
+        bulkSel.appendChild(opt);
+      });
+    }
+    if (filterSel) {
+      const currentVal = filterSel.value || 'all';
+      filterSel.innerHTML = '<option value="all">All Categories</option>';
+      adminCategories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.id;
+        opt.textContent = cat.name;
+        opt.setAttribute('data-name', cat.name);
+        filterSel.appendChild(opt);
+      });
+      filterSel.value = currentVal;
+    }
+  }// Create Category Modal & Form
   const newCatModal = document.getElementById('newCatModal');
   document.getElementById('openAddCatModalBtn')?.addEventListener('click', () => {
     newCatModal.classList.add('open');
@@ -2707,6 +2991,8 @@ function initAdminDashboardApp() {
         }
       }
     });
+
+
   }
 
   if (prjFileInput) {
@@ -2881,6 +3167,628 @@ function initAdminDashboardApp() {
     };
 
     reader.readAsDataURL(file);
+  });
+
+  // --- BULK SCALE MODEL UPLOAD WORKFLOW (UP TO 20 IMAGES) ---
+  const modeBtnSingle = document.getElementById('modeBtnSingle');
+  const modeBtnBulk = document.getElementById('modeBtnBulk');
+  const singleUploadForm = document.getElementById('uploadPrjForm');
+  const bulkUploadSection = document.getElementById('bulkUploadSection');
+  const prjBulkFileInput = document.getElementById('prjBulkFileInput');
+  const bulkPreviewContainer = document.getElementById('bulkPreviewContainer');
+  const bulkPreviewGrid = document.getElementById('bulkPreviewGrid');
+  const bulkCounterBar = document.getElementById('bulkCounterBar');
+  const bulkCountDisplay = document.getElementById('bulkCountDisplay');
+  const bulkResetBtn = document.getElementById('bulkResetBtn');
+  const bulkUploadSubmitBtn = document.getElementById('bulkUploadSubmitBtn');
+  const bulkProgressBox = document.getElementById('bulkProgressBox');
+  const bulkProgressStageText = document.getElementById('bulkProgressStageText');
+  const bulkProgressPct = document.getElementById('bulkProgressPct');
+  const bulkProgressBarFill = document.getElementById('bulkProgressBarFill');
+  const bulkProgressDetails = document.getElementById('bulkProgressDetails');
+  const bulkBaseTitleInput = document.getElementById('bulkBaseTitleInput');
+  const bulkUploadCategory = document.getElementById('bulkUploadCategory');
+
+  let stagedBulkFiles = [];
+
+  const CATEGORY_SCALE_ASPECTS = {
+    'building-models': [
+      { titleSuffix: 'Architectural Elevation View', desc: 'Precision physical scale model highlighting exterior proportions, facade geometry, and architectural studio craftsmanship.' },
+      { titleSuffix: 'Physical Massing Study', desc: 'Architectural scale model presenting spatial building volumes, clean alignment, and exterior massing.' },
+      { titleSuffix: 'Facade Detailing & Fenestration', desc: 'Detailed architectural scale study focusing on exterior surface textures, clean window mullions, and material alignment.' },
+      { titleSuffix: 'Overall Masterplan Perspective', desc: 'Comprehensive scale model replica presenting site massing, peripheral access, and spatial building orientation.' },
+      { titleSuffix: 'Podium & Context Craftsmanship', desc: 'Scale architectural prototype illustrating lower podium levels, surrounding site context, and clean joinery.' },
+      { titleSuffix: 'Finished Studio Presentation Model', desc: 'Comprehensive architectural scale replica built for client review, sales presentations, and exhibitions.' },
+      { titleSuffix: 'Exterior Volume & Form Study', desc: 'Physical scale replica demonstrating architectural proportions, balance, and spatial geometry.' },
+      { titleSuffix: 'Refined Elevation Perspective', desc: 'Studio scale model view highlighting vertical architectural articulation and realistic material finishes.' },
+      { titleSuffix: 'Entrance Forecourt & Arrival View', desc: 'Physical scale study of the primary entrance design, approach circulation, and studio detailing.' },
+      { titleSuffix: 'Rooftop & Upper Terrace Section', desc: 'Detailed scale model view showcasing upper level architecture, clean balustrades, and terrace layout.' },
+      { titleSuffix: 'Spatial Proportion & Scale Model', desc: 'Architectural prototype constructed to evaluate true-to-scale dimensions and exterior balance.' },
+      { titleSuffix: 'Illuminated Presentation Angle', desc: 'Physical scale model viewed under studio lighting showcasing fine craftsmanship and geometric harmony.' },
+      { titleSuffix: 'Precision Laser-Cut Assembly', desc: 'Architectural scale study featuring high-precision laser-cut components and crisp edge junctions.' },
+      { titleSuffix: 'Site Relationship & Orientation Study', desc: 'Scale model replica reflecting natural site orientation, structural layout, and building massing.' },
+      { titleSuffix: 'Balcony & Fenestration Articulation', desc: 'Close-up craftsmanship view illustrating exterior balcony profiles, textured edges, and facade symmetry.' },
+      { titleSuffix: 'High-Fidelity Studio Showcase', desc: 'Complete physical scale model prepared for exhibitions, developer marketing, and client presentations.' },
+      { titleSuffix: 'Clean Geometric Massing Study', desc: 'Laser-crafted architectural physical model emphasizing crisp geometric lines and true-to-scale proportions.' },
+      { titleSuffix: 'Studio Display Perspective', desc: 'Finished architectural scale replica photographed under exhibition-grade studio conditions.' },
+      { titleSuffix: 'Full Assembly Showcase', desc: 'Comprehensive architectural scale model displaying volumetric balance, authentic proportions, and fine finishes.' },
+      { titleSuffix: 'Exhibition Master Showcase', desc: 'Master physical scale presentation model highlighting clean joinery, durable materials, and architectural craft.' },
+      { titleSuffix: 'Architectural Proportions Overview', desc: 'Scale model study highlighting exterior scale relationships, vertical alignment, and symmetry.' },
+      { titleSuffix: 'Tower Massing & Skyward Profile', desc: 'Detailed physical scale replica demonstrating tower proportions, clean edges, and vertical massing.' },
+      { titleSuffix: 'Landscape & Site Masterplan', desc: 'Physical architectural model showcasing surrounding landscape zoning, vehicular access, and green spaces.' },
+      { titleSuffix: 'Perimeter Alignment & Context', desc: 'Physical scale study of the property perimeter, boundaries, and site integration.' },
+      { titleSuffix: 'Studio Craftsmanship Perspective', desc: 'Architectural scale model crafted with precision acrylics, hand assembly, and fine finishes.' },
+      { titleSuffix: 'Exterior Geometry & Facade Relief', desc: 'Physical model highlighting rhythmic window depths, shadow lines, and architectural textures.' },
+      { titleSuffix: 'Comprehensive Development Model', desc: 'Finished physical scale replica representing the complete development footprint and structural harmony.' },
+      { titleSuffix: 'Structural Proportions & Scale Study', desc: 'Scale model constructed to evaluate dimensional accuracy and overall spatial balance.' },
+      { titleSuffix: 'Architectural Perspective Angle', desc: 'Physical scale model photographed from an elevated angle highlighting design proportions.' },
+      { titleSuffix: 'Master Presentation Prototype', desc: 'Physical scale showcase built for high-profile client exhibitions and architectural showcases.' },
+      { titleSuffix: 'Studio Gallery Showcase', desc: 'Finished architectural scale model presented with precision craftsmanship and clean architectural detailing.' },
+      { titleSuffix: 'Spatial Clearance & Elevation', desc: 'Architectural physical model demonstrating ground clearance, vertical rhythms, and clean joints.' },
+      { titleSuffix: 'Laser-Crafted Facade Study', desc: 'High-precision laser-cut model featuring meticulous material interfaces and smooth surface finishes.' },
+      { titleSuffix: 'Refined Site Plan Replica', desc: 'Physical scale model presenting accurate footprint placement, courtyard spaces, and access pathways.' },
+      { titleSuffix: 'Architectural Form & Volume Showcase', desc: 'Complete scale model highlighting mass distribution, aesthetic harmony, and craftsmanship.' }
+    ],
+    'plant-models': [
+      { titleSuffix: 'Industrial Facility Overview', desc: 'Comprehensive industrial scale model showcasing spatial facility layout, building positioning, and site planning.' },
+      { titleSuffix: 'Industrial Site Perspective', desc: 'Precision scale replica constructed for engineering review, client presentations, and site orientation.' },
+      { titleSuffix: 'Plant Infrastructure Model', desc: 'Physical scale model built with durable industrial materials for technical exhibition and facility planning.' },
+      { titleSuffix: 'Master Industrial Layout', desc: 'Physical scale model showcasing comprehensive industrial zoning, circulation pathways, and facility orientation.' },
+      { titleSuffix: 'Industrial Campus Scale Model', desc: 'Detailed physical scale model presenting industrial facility footprint, structural massing, and accurate proportions.' },
+      { titleSuffix: 'Full Facility Presentation', desc: 'Comprehensive industrial scale display showing complete site layout and proportional engineering relationships.' },
+      { titleSuffix: 'Refined Industrial Detailing', desc: 'Close-up view of industrial physical scale model displaying clean fabrication, precise alignment, and durable assembly.' },
+      { titleSuffix: 'Facility Spatial Study', desc: 'Physical scale model developed to visualize complex industrial installations and site connectivity.' },
+      { titleSuffix: 'Operational Site Layout', desc: 'Scale model replica highlighting operational zones, logistics pathways, and facility structures.' },
+      { titleSuffix: 'Engineering Plant Showcase', desc: 'Detailed physical scale replica built for trade exhibitions, engineering reviews, and client presentations.' },
+      { titleSuffix: 'Plant Structure Perspective', desc: 'Precision industrial scale model displaying structural framework, clean joinery, and durable fabrication.' },
+      { titleSuffix: 'Site Coordination Model', desc: 'Physical scale prototype constructed to assist engineering teams with spatial coordination and site planning.' },
+      { titleSuffix: 'Industrial Complex Prototype', desc: 'High-durability physical scale model representing industrial layout with accurate engineering scales.' },
+      { titleSuffix: 'Technical Presentation Model', desc: 'Master industrial scale replica crafted for operational walkthroughs, safety reviews, and stakeholder presentations.' },
+      { titleSuffix: 'Plant Geometry Study', desc: 'Scale model view illustrating proportional geometry, spatial clearance, and structural arrangement.' },
+      { titleSuffix: 'Industrial Facility Craftsmanship', desc: 'Studio crafted industrial scale replica demonstrating clean assembly, precision cuts, and durable materials.' },
+      { titleSuffix: 'Scale Facility Layout', desc: 'Physical scale model showing overall site orientation, logistical flow, and facility boundaries.' },
+      { titleSuffix: 'Exhibition Plant Model', desc: 'Comprehensive industrial scale display built for international expos, investor meetings, and technical reviews.' },
+      { titleSuffix: 'Finished Industrial Showcase', desc: 'Master crafted industrial scale model highlighting meticulous fabrication and authentic engineering proportions.' },
+      { titleSuffix: 'Industrial Zoning & Footprint Model', desc: 'Physical scale replica displaying facility perimeter, access roads, and operational building layout.' },
+      { titleSuffix: 'Engineering Review Prototype', desc: 'Industrial scale model constructed for spatial verification, site planning, and stakeholder review.' },
+      { titleSuffix: 'Industrial Master Layout Model', desc: 'Studio scale replica highlighting building placement, administrative blocks, and operational clusters.' },
+      { titleSuffix: 'Facility Elevation & Form Study', desc: 'Physical scale model illustrating facility height profiles, vertical structures, and clean alignment.' },
+      { titleSuffix: 'Logistics & Circulation Scale Model', desc: 'Detailed industrial model showing internal traffic flow, loading zones, and site connectivity.' },
+      { titleSuffix: 'Industrial Scale Display Model', desc: 'Exhibition-grade physical model crafted with durable acrylics and industrial finishes.' },
+      { titleSuffix: 'Processing Campus Prototype', desc: 'Comprehensive scale model representing multi-structure industrial facilities and spatial balance.' },
+      { titleSuffix: 'Technical Scale Facility Study', desc: 'Physical model built for engineering coordination, spatial visualization, and client demonstration.' },
+      { titleSuffix: 'Industrial Architecture Perspective', desc: 'Physical scale replica focusing on structural enclosures, utility buildings, and site integration.' },
+      { titleSuffix: 'Durable Industrial Presentation Model', desc: 'Physical scale model manufactured with high-strength materials for long-term display.' },
+      { titleSuffix: 'Precision Facility Scale Replica', desc: 'Studio model built to exact engineering proportions, featuring crisp edges and clean assembly.' },
+      { titleSuffix: 'Industrial Utility Block Model', desc: 'Scale replica highlighting support facilities, access routes, and structural zoning.' },
+      { titleSuffix: 'Heavy Industrial Campus Model', desc: 'Master physical scale model showcasing large-scale industrial complexes and layout harmony.' },
+      { titleSuffix: 'Facility Infrastructure Perspective', desc: 'Physical scale model presenting structural layout, safety setbacks, and site orientation.' },
+      { titleSuffix: 'Industrial Site Proportions Model', desc: 'Physical scale study demonstrating volumetric balance, spatial efficiency, and engineering accuracy.' },
+      { titleSuffix: 'Trade Exhibition Industrial Model', desc: 'Finished physical scale showcase designed for corporate boardrooms and industrial trade fairs.' }
+    ],
+    'machine-models': [
+      { titleSuffix: 'Mechanical Equipment Replica', desc: 'Precision physical scale model highlighting mechanical assembly, component geometry, and industrial craftsmanship.' },
+      { titleSuffix: 'Precision Engineering Study', desc: 'Physical scale prototype crafted for technical review, proportional accuracy, and component spatial visualization.' },
+      { titleSuffix: 'Equipment Assembly Showcase', desc: 'Detailed industrial machine replica demonstrating craftsmanship, mechanical form, and clean fabrication.' },
+      { titleSuffix: 'Industrial Machinery Study', desc: 'Technical scale model built for trade exhibitions, engineering presentations, and spatial analysis.' },
+      { titleSuffix: 'Operational Scale Concept', desc: 'Precision scale replica representing industrial machinery assembly and mechanical proportions.' },
+      { titleSuffix: 'Precision Component Model', desc: 'Physical scale prototype showing clean joinery, accurate scaling, and durable industrial materials.' },
+      { titleSuffix: 'Master Mechanical Prototype', desc: 'Studio crafted mechanical model built for client demonstrations and engineering visualization.' },
+      { titleSuffix: 'Mechanical Assembly Perspective', desc: 'Physical scale replica detailing machine housing, structural components, and precise alignment.' },
+      { titleSuffix: 'Industrial Equipment Perspective', desc: 'Scale model view highlighting machine exterior profile, dimensional balance, and fine finishes.' },
+      { titleSuffix: 'Engineered Scale Study', desc: 'Physical scale prototype constructed for technical education, dimensional verification, and trade exhibitions.' },
+      { titleSuffix: 'Machinery Craftsmanship Showcase', desc: 'Close-up perspective of precision scale machine model showing meticulous assembly and durable materials.' },
+      { titleSuffix: 'Technical Apparatus Replica', desc: 'High-precision physical scale model representing industrial equipment with true-to-life proportions.' },
+      { titleSuffix: 'Component Alignment Study', desc: 'Physical scale prototype illustrating component relationships, clean seams, and accurate scale factors.' },
+      { titleSuffix: 'Exhibition Machine Model', desc: 'Finished industrial machinery scale model prepared for trade show display and technical demonstrations.' },
+      { titleSuffix: 'Mechanical Form & Proportion', desc: 'Physical scale study demonstrating exterior contours, mechanical volume, and studio craftsmanship.' },
+      { titleSuffix: 'Industrial Apparatus Model', desc: 'Scale engineering replica built for client review, product demonstration, and technical display.' },
+      { titleSuffix: 'Precision Equipment Prototype', desc: 'Scale model showcasing accurate dimensions, robust fabrication, and realistic mechanical finishes.' },
+      { titleSuffix: 'Machine Geometry Perspective', desc: 'Studio scale model view highlighting geometric precision, clean cuts, and industrial aesthetics.' },
+      { titleSuffix: 'Technical Engineering Model', desc: 'Physical scale replica developed for engineering coordination, spatial review, and client presentations.' },
+      { titleSuffix: 'Finished Machine Showcase', desc: 'Complete mechanical scale model displaying professional craftsmanship, accurate scales, and quality finish.' },
+      { titleSuffix: 'Heavy Equipment Scale Prototype', desc: 'Physical scale model constructed to evaluate machine scale, operator ergonomics, and exterior styling.' },
+      { titleSuffix: 'Mechanical Housing & Structure', desc: 'Scale model perspective showcasing protective casing, mount points, and clean industrial seams.' },
+      { titleSuffix: 'Industrial Device Scale Model', desc: 'Physical prototype created for technical briefings, product showcases, and client walkthroughs.' },
+      { titleSuffix: 'Mechanical Geometry & Balance', desc: 'Studio scale replica highlighting symmetrical forms, durable materials, and engineering balance.' },
+      { titleSuffix: 'Precision Engineered Replica', desc: 'Accurate physical scale model crafted for technical exhibitions, product launches, and investor meetings.' },
+      { titleSuffix: 'Machine Profiling & Massing Study', desc: 'Physical scale model focusing on exterior contours, weight distribution, and mechanical proportions.' },
+      { titleSuffix: 'Industrial Prototype Presentation', desc: 'Physical model demonstrating manufacturing precision, tight assembly tolerances, and durable paint finishes.' },
+      { titleSuffix: 'Technical Hardware Scale Model', desc: 'Comprehensive scale replica representing industrial equipment with true-to-scale dimensional fidelity.' },
+      { titleSuffix: 'Mechanical Detailing Perspective', desc: 'Close-up physical model view showing clean joint lines, hardware accents, and studio finishing.' },
+      { titleSuffix: 'Master Equipment Display Model', desc: 'High-grade physical scale presentation model prepared for client showrooms and corporate headquarters.' },
+      { titleSuffix: 'Component Proportions Model', desc: 'Physical scale model showcasing component sizing, mechanical clearance, and balanced assembly.' },
+      { titleSuffix: 'Industrial Drive Assembly Model', desc: 'Technical scale model built for trade demonstrations and engineering evaluations.' },
+      { titleSuffix: 'Equipment Casing Prototype', desc: 'Scale model highlighting external housing lines, inspection panels, and clean finishes.' },
+      { titleSuffix: 'Technical Display Showcase', desc: 'Studio scale model crafted for engineering showrooms and client demonstrations.' },
+      { titleSuffix: 'Mechanical Engineering Model', desc: 'Finished scale replica highlighting durable materials, accurate dimensions, and quality craft.' }
+    ],
+    'miniature-models': [
+      { titleSuffix: 'Intricate Scale Miniature', desc: 'Handcrafted physical scale miniature featuring detailed craftsmanship, authentic textures, and fine finishes.' },
+      { titleSuffix: 'Thematic Miniature Showcase', desc: 'Custom miniature model built for spatial representation, exhibition displays, and aesthetic review.' },
+      { titleSuffix: 'Diorama Scale Study', desc: 'Artisan scale diorama highlighting spatial composition, realistic landscape elements, and detailed craftsmanship.' },
+      { titleSuffix: 'Context Miniature Perspective', desc: 'Precision scale miniature crafted for spatial planning, public presentations, and creative displays.' },
+      { titleSuffix: 'Physical Scale Diorama', desc: 'Custom physical miniature showcasing fine detail, proportional accuracy, and durable model-making materials.' },
+      { titleSuffix: 'Detailed Landscape Miniature', desc: 'Physical scale miniature presenting ground contours, environmental features, and hand-finished elements.' },
+      { titleSuffix: 'Artisan Miniature Study', desc: 'Studio crafted miniature model demonstrating meticulous micro-craftsmanship and balanced composition.' },
+      { titleSuffix: 'Thematic Diorama Perspective', desc: 'Physical miniature replica built for exhibition displays, artistic evaluation, and client review.' },
+      { titleSuffix: 'Micro-Scale Presentation', desc: 'Intricate miniature scale model featuring fine surface textures and authentic color palettes.' },
+      { titleSuffix: 'Scale Diorama Craftsmanship', desc: 'Close-up view of handcrafted scale diorama showcasing clean joinery and delicate environmental detailing.' },
+      { titleSuffix: 'Custom Miniature Prototype', desc: 'Precision miniature model developed for creative visualization, concept presentation, and spatial review.' },
+      { titleSuffix: 'Detailed Context Model', desc: 'Hand-finished scale miniature presenting surrounding features, accurate scale ratios, and artistic quality.' },
+      { titleSuffix: 'Exhibition Scale Miniature', desc: 'High-detail physical miniature crafted for museum display, gallery showcase, and client review.' },
+      { titleSuffix: 'Diorama Composition View', desc: 'Physical scale diorama highlighting spatial harmony, realistic materials, and fine studio finish.' },
+      { titleSuffix: 'Finished Miniature Showcase', desc: 'Complete artisan scale miniature displayed under balanced studio lighting.' },
+      { titleSuffix: 'Spatial Miniature Study', desc: 'Handcrafted miniature model built to evaluate spatial scales, layout relationships, and visual aesthetics.' },
+      { titleSuffix: 'Intricate Diorama Section', desc: 'Detailed view of physical scale miniature showcasing fine micro-detailing and durable fabrication.' },
+      { titleSuffix: 'Artisan Presentation Model', desc: 'Studio crafted physical miniature constructed with precision materials for public presentation.' },
+      { titleSuffix: 'Thematic Scale Replica', desc: 'Custom scale miniature built to honor creative themes, realistic dimensions, and artisan craftsmanship.' },
+      { titleSuffix: 'Master Miniature Showcase', desc: 'Exhibition-grade physical miniature demonstrating exceptional hand-craftsmanship and balanced aesthetics.' },
+      { titleSuffix: 'Environmental Scale Miniature', desc: 'Physical miniature highlighting natural topography, terrain transitions, and handcrafted accents.' },
+      { titleSuffix: 'Heritage Diorama Replica', desc: 'Scale miniature model recreating historical settings with archival sensitivity and micro-scale precision.' },
+      { titleSuffix: 'Architectural Miniature Perspective', desc: 'Hand-assembled scale miniature capturing building context, surrounding pathways, and fine scale greenery.' },
+      { titleSuffix: 'Precision Diorama Layout', desc: 'Physical scale model demonstrating balanced spatial zoning, miniature proportions, and studio finishes.' },
+      { titleSuffix: 'Artisan Landscape Study', desc: 'Detailed miniature model showcasing delicate ground foliage, natural textures, and micro-craftsmanship.' },
+      { titleSuffix: 'Scenic Miniature Showcase', desc: 'Studio crafted physical diorama prepared for educational exhibits, galleries, and corporate displays.' },
+      { titleSuffix: 'Micro-Environment Scale Model', desc: 'Physical scale miniature illustrating environmental harmony, elevation changes, and artistic balance.' },
+      { titleSuffix: 'Detailed Scene Replica', desc: 'Handcrafted miniature diorama featuring authentic material selections and realistic studio presentation.' },
+      { titleSuffix: 'Curated Miniature Display', desc: 'Exhibition-quality scale miniature model crafted for public admiration and aesthetic excellence.' },
+      { titleSuffix: 'Master Artisan Miniature', desc: 'Complete physical miniature model highlighting studio dedication to micro-scale accuracy and beauty.' },
+      { titleSuffix: 'Scaled Diorama Perspective', desc: 'Physical scale diorama created to illustrate spatial stories and visual depth.' },
+      { titleSuffix: 'Topographical Miniature Study', desc: 'Artisan miniature featuring contour layers, elevation shifts, and natural accents.' },
+      { titleSuffix: 'Precision Ground Plane Model', desc: 'Physical scale miniature emphasizing ground level layout, access paths, and spatial clarity.' },
+      { titleSuffix: 'Handcrafted Miniature Replica', desc: 'Detailed scale miniature constructed with durable polymers, fine acrylics, and studio finishes.' },
+      { titleSuffix: 'Fine Diorama Showcase', desc: 'Exhibition miniature display showcasing fine craftsmanship, realistic proportions, and quality lighting.' }
+    ],
+    'monument-models': [
+      { titleSuffix: 'Heritage Monument Replica', desc: 'Architectural heritage scale replica honoring landmark geometry, fine material finishes, and studio craftsmanship.' },
+      { titleSuffix: 'Civic Structure Scale Model', desc: 'Physical scale model crafted for historical commemoration, civic review, and museum-grade exhibition.' },
+      { titleSuffix: 'Architectural Landmark Study', desc: 'Precision scale model capturing landmark architectural form, dignified proportions, and fine finishes.' },
+      { titleSuffix: 'Monumental Scale Model', desc: 'Studio crafted heritage replica built for exhibitions, educational displays, and architectural presentations.' },
+      { titleSuffix: 'Heritage Craftsmanship View', desc: 'Close-up scale model perspective showcasing carved motifs, masonry textures, and historic detailing.' },
+      { titleSuffix: 'Monument Elevation Perspective', desc: 'Physical scale model highlighting vertical elevation lines, dignified scale, and architectural presence.' },
+      { titleSuffix: 'Historic Landmark Replica', desc: 'Museum-grade scale replica developed with archival fidelity, accurate proportions, and durable materials.' },
+      { titleSuffix: 'Civic Memorial Model', desc: 'Detailed physical scale model constructed for public presentation, memorial reviews, and civic planning.' },
+      { titleSuffix: 'Monumental Arch & Facade', desc: 'Precision scale study focusing on structural arches, columns, and heritage surface finishes.' },
+      { titleSuffix: 'Heritage Scale Prototype', desc: 'Physical architectural prototype honoring cultural landmarks with authentic craftsmanship.' },
+      { titleSuffix: 'Civic Architecture Showcase', desc: 'Scale model replica built for municipal exhibitions, historical archives, and architectural review.' },
+      { titleSuffix: 'Historic Structure Study', desc: 'Detailed physical scale model demonstrating traditional architectural geometry and studio finishing.' },
+      { titleSuffix: 'Landmark Proportions Model', desc: 'Physical scale replica capturing true-to-life geometric ratios and stately structural balance.' },
+      { titleSuffix: 'Monument Detail Perspective', desc: 'Studio view of physical scale replica highlighting ornate craftsmanship and crisp material boundaries.' },
+      { titleSuffix: 'Cultural Memorial Prototype', desc: 'Fine physical scale model crafted for architectural conservation, donor presentations, and civic display.' },
+      { titleSuffix: 'Monumental Form & Volume', desc: 'Physical scale study representing monumental massing, symmetry, and architectural gravitas.' },
+      { titleSuffix: 'Exhibition Heritage Showcase', desc: 'Full-scale physical model created for cultural expos, museum presentations, and archival preservation.' },
+      { titleSuffix: 'Civic Landmark Detailing', desc: 'Close-up perspective of physical scale model showing fine textures, clean edges, and dignified tones.' },
+      { titleSuffix: 'Master Monument Replica', desc: 'Comprehensive heritage scale model built with precision laser cutting and fine studio handiwork.' },
+      { titleSuffix: 'Finished Monument Showcase', desc: 'Master physical scale presentation replica displayed under uniform gallery-grade illumination.' },
+      { titleSuffix: 'Commemorative Scale Model', desc: 'Physical scale replica honoring historical architecture, dignified geometry, and archival fidelity.' },
+      { titleSuffix: 'Landmark Elevation & Plinth', desc: 'Scale model study highlighting plinth geometry, foundation craft, and vertical symmetry.' },
+      { titleSuffix: 'Architectural Heritage Scale Study', desc: 'Physical model constructed to preserve and showcase historic architectural achievements.' },
+      { titleSuffix: 'Stately Monument Perspective', desc: 'Scale physical replica capturing proportional grandeur, authentic materials, and fine studio finish.' },
+      { titleSuffix: 'Heritage Conservation Model', desc: 'Physical scale prototype built for conservation committees, archival records, and museum display.' },
+      { titleSuffix: 'Cultural Monument Prototype', desc: 'Studio crafted heritage model featuring laser-etched detailing and classical architectural balance.' },
+      { titleSuffix: 'Landmark Spatial Scale Model', desc: 'Physical scale replica presenting the memorial structure in relation to surrounding public plazas.' },
+      { titleSuffix: 'Historic Column & Arch Detailing', desc: 'Close-up view of precision scale model highlighting ornamental symmetry and crisp stonework replication.' },
+      { titleSuffix: 'Municipal Landmark Showcase', desc: 'Physical scale model prepared for city planning exhibitions and civic recognition.' },
+      { titleSuffix: 'Master Heritage Showcase', desc: 'Finished museum-grade physical scale model demonstrating architectural reverence and precision craft.' },
+      { titleSuffix: 'Archival Monument Replica', desc: 'Physical scale replica crafted to exact archival drawings, featuring authentic stonework textures.' },
+      { titleSuffix: 'Civic Landmark Proportions', desc: 'Scale model perspective showcasing balanced civic presence, entrance stairs, and dignified symmetry.' },
+      { titleSuffix: 'Heritage Architecture Model', desc: 'Studio scale model crafted with precision laser-cutting and fine traditional hand-finishing.' },
+      { titleSuffix: 'Monumental Craftsmanship Study', desc: 'Close-up view of historic replica highlighting decorative moulding, pediments, and clean joins.' },
+      { titleSuffix: 'Historic Memorial Showcase', desc: 'Complete physical scale replica built for historical exhibitions and civic ceremonies.' }
+    ],
+    '3d-printing': [
+      { titleSuffix: 'Precision 3D Printed Prototype', desc: 'High-resolution 3D printed physical model showcasing fine layer resolution, clean surfaces, and accurate geometry.' },
+      { titleSuffix: 'Additive Fabrication Study', desc: 'Precision rapid prototype created for dimensional verification, client review, and spatial evaluation.' },
+      { titleSuffix: 'High-Detail 3D Printed Model', desc: 'Precision scale replica fabricated using advanced 3D printing techniques and hand-finished studio quality.' },
+      { titleSuffix: 'Rapid Prototyping Showcase', desc: 'Physical scale prototype demonstrating additive manufacturing capabilities, tight tolerances, and smooth finishing.' },
+      { titleSuffix: 'Dimensional Validation Model', desc: 'Accurate 3D printed scale model produced for architectural and engineering geometric verification.' },
+      { titleSuffix: 'SLA High-Resolution Prototype', desc: 'Smooth resin physical scale prototype displaying crisp fine features and seamless surface finishes.' },
+      { titleSuffix: 'Additive Architecture Model', desc: 'Physical scale model combining high-speed additive manufacturing with fine studio craftsmanship.' },
+      { titleSuffix: 'Rapid Concept Replica', desc: 'Quick-turn physical scale prototype built for iterative design review and spatial validation.' },
+      { titleSuffix: 'Complex Geometry 3D Print', desc: 'Physical scale replica showcasing intricate organic surfaces, lattices, and parametric geometry.' },
+      { titleSuffix: 'Industrial 3D Print Prototype', desc: 'Durable physical scale model fabricated for functional testing, design review, and technical display.' },
+      { titleSuffix: 'Precision Additive Model', desc: 'High-accuracy 3D printed physical model featuring crisp contours and balanced proportions.' },
+      { titleSuffix: 'Finished 3D Printed Showcase', desc: 'Studio-cured and post-processed 3D printed model presented under gallery lighting.' },
+      { titleSuffix: 'Rapid Scale Model Prototype', desc: 'Physical prototype built with additive fabrication for expedited client presentations.' },
+      { titleSuffix: 'Geometric Validation Replica', desc: 'Precision 3D printed scale model constructed to verify complex architectural profiles and tolerances.' },
+      { titleSuffix: 'Hybrid 3D Printed Assembly', desc: 'Physical scale model combining precision 3D printed cores with laser-cut acrylic detailing.' },
+      { titleSuffix: 'Custom Additive Component', desc: 'Tailored 3D printed scale component crafted for bespoke architectural and industrial models.' },
+      { titleSuffix: 'Fine Resin Print Prototype', desc: 'Ultra-detailed SLA resin physical model showing smooth curves, sharp corners, and micro-features.' },
+      { titleSuffix: 'Functional Prototyping Study', desc: 'Physical scale model produced for spatial fit evaluation and client demonstration.' },
+      { titleSuffix: 'Exhibition 3D Printed Model', desc: 'Finished additive manufacturing scale showcase crafted for trade exhibitions and design reviews.' },
+      { titleSuffix: 'Master 3D Print Showcase', desc: 'Precision fabricated 3D printed scale replica demonstrating studio finishing and geometric fidelity.' },
+      { titleSuffix: 'Parametric Scale Model Prototype', desc: 'Physical 3D printed model presenting complex algorithmic geometries and clean layering.' },
+      { titleSuffix: 'High-Tolerances Rapid Prototype', desc: 'Additive scale model engineered for precise dimensional verification and fit checks.' },
+      { titleSuffix: 'Additive Surface Detailing', desc: 'Close-up perspective of 3D printed model showcasing fine layer transitions and smooth post-finishing.' },
+      { titleSuffix: 'Industrial Polymer Scale Model', desc: 'High-strength 3D printed prototype built for durability, handling, and technical review.' },
+      { titleSuffix: 'Multi-Part 3D Printed Assembly', desc: 'Modular 3D printed scale replica featuring interlocking parts and clean dimensional joints.' },
+      { titleSuffix: 'Fast-Turnaround Scale Prototype', desc: 'Additive prototype produced for immediate design evaluations and stakeholder briefings.' },
+      { titleSuffix: 'Advanced Resin Prototyping', desc: 'Precision stereolithography model displaying microscopic edge sharpness and glass-smooth faces.' },
+      { titleSuffix: 'Architectural 3D Print Study', desc: 'Scale model uniting digital 3D printing precision with studio hand-finishing and painting.' },
+      { titleSuffix: 'Additive Component Showcase', desc: 'Bespoke 3D printed model demonstrating industrial accuracy, clean contours, and fine textures.' },
+      { titleSuffix: 'Studio 3D Printed Presentation', desc: 'Finished additive physical replica photographed under studio lighting for client delivery.' },
+      { titleSuffix: 'Precision Polymer Model', desc: 'Durable physical scale prototype highlighting accurate material thickness and clean edges.' },
+      { titleSuffix: 'Fine-Resolution SLA Print', desc: 'Photopolymer resin scale model displaying subtle architectural chamfers and crisp details.' },
+      { titleSuffix: 'Layer-Optimized Rapid Prototype', desc: '3D printed scale model engineered for superior dimensional stability and aesthetic appeal.' },
+      { titleSuffix: 'Technical 3D Printed Assembly', desc: 'Multi-element physical scale model showcasing seamless fits and studio post-processing.' },
+      { titleSuffix: 'Studio Rapid Prototype Showcase', desc: 'Complete 3D printed scale model ready for engineering review and client presentation.' }
+    ],
+    'default': [
+      { titleSuffix: 'Precision Scale Study', desc: 'Physical scale model crafted with precision fabrication, accurate proportions, and studio-grade finishes.' },
+      { titleSuffix: 'Physical Scale Replica', desc: 'Detailed physical scale replica built for client presentation, spatial review, and exhibition displays.' },
+      { titleSuffix: 'Studio Presentation Model', desc: 'Scale model showcasing meticulous assembly, durable craftsmanship, and true-to-scale geometry.' },
+      { titleSuffix: 'Custom Scale Prototype', desc: 'Physical scale model developed for spatial visualization, design evaluations, and client review.' },
+      { titleSuffix: 'Master Scale Perspective', desc: 'Comprehensive physical scale model presenting volumetric balance and professional craftsmanship.' },
+      { titleSuffix: 'Craftsmanship Detail View', desc: 'Close-up perspective highlighting clean joint craftsmanship, accurate proportions, and fine finishes.' },
+      { titleSuffix: 'Finished Studio Showcase', desc: 'Studio crafted scale model photographed under uniform presentation conditions.' },
+      { titleSuffix: 'Dimensional Scale Prototype', desc: 'Physical scale replica built to evaluate spatial dimensions, form, and overall aesthetic harmony.' },
+      { titleSuffix: 'Exhibition Scale Presentation', desc: 'High-fidelity physical model prepared for public display, corporate presentations, and design reviews.' },
+      { titleSuffix: 'Refined Physical Scale Model', desc: 'Precision scale replica highlighting durable materials, fine finishing, and authentic proportions.' },
+      { titleSuffix: 'Spatial Massing & Scale Study', desc: 'Physical scale model constructed to demonstrate exterior massing, alignment, and spatial balance.' },
+      { titleSuffix: 'Handcrafted Studio Model', desc: 'Artisan physical scale model built with laser-cut components and careful hand assembly.' },
+      { titleSuffix: 'Client Presentation Model', desc: 'Professional scale replica crafted to assist stakeholders with spatial understanding and review.' },
+      { titleSuffix: 'Studio Prototyping Showcase', desc: 'Physical scale model showcasing accurate dimensions, clean material edges, and fine detailing.' },
+      { titleSuffix: 'Scale Assembly Perspective', desc: 'Comprehensive model view illustrating precise fabrication and architectural proportions.' },
+      { titleSuffix: 'Geometric Balance Study', desc: 'Physical scale prototype demonstrating volumetric harmony, clean lines, and studio finishes.' },
+      { titleSuffix: 'Detailed Physical Replica', desc: 'Accurate scale model crafted with high-grade acrylics and professional studio finishes.' },
+      { titleSuffix: 'Full Presentation Perspective', desc: 'Finished scale model highlighting balanced geometry, craftsmanship, and visual impact.' },
+      { titleSuffix: 'Studio Exhibition Model', desc: 'Master physical scale replica built for trade exhibitions, sales centers, and client review.' },
+      { titleSuffix: 'Complete Scale Model Showcase', desc: 'Master physical scale presentation model demonstrating quality craftsmanship and true-to-life scale.' },
+      { titleSuffix: 'Dimensional Proportion Study', desc: 'Physical scale model constructed to evaluate balance, volumetric ratios, and spatial relationships.' },
+      { titleSuffix: 'Refined Presentation Angle', desc: 'Physical scale model viewed from an elevated vantage point displaying clean joinery and surface finish.' },
+      { titleSuffix: 'Studio Fabrication Model', desc: 'Precision crafted scale model highlighting laser-accurate cuts, smooth seams, and premium materials.' },
+      { titleSuffix: 'Comprehensive Scale Perspective', desc: 'Full physical scale replica representing exterior contours and true architectural proportions.' },
+      { titleSuffix: 'Hand-Finished Scale Prototype', desc: 'Artisan scale model featuring hand-applied paint finishes, clean edges, and balanced tones.' },
+      { titleSuffix: 'Spatial Orientation Study', desc: 'Physical scale replica demonstrating alignment, natural orientation, and site context.' },
+      { titleSuffix: 'Fine Craftsmanship Perspective', desc: 'Close-up model perspective emphasizing high-tolerance assembly and meticulous handiwork.' },
+      { titleSuffix: 'Professional Scale Showcase', desc: 'Exhibition-grade physical model developed for client review, trade shows, and corporate offices.' },
+      { titleSuffix: 'Finished Prototyping Model', desc: 'High-quality scale model displaying authentic scales, sturdy assembly, and gallery presentation.' },
+      { titleSuffix: 'Master Physical Presentation', desc: 'Complete studio scale model embodying decades of model-making excellence and artisanal precision.' },
+      { titleSuffix: 'Exhibition-Grade Scale Model', desc: 'Premium physical model crafted for high-profile public galleries and client marketing suites.' },
+      { titleSuffix: 'Studio Display Prototype', desc: 'Scale physical replica photographed under studio conditions highlighting clean form.' },
+      { titleSuffix: 'Scale Alignment Perspective', desc: 'Physical scale model illustrating geometric alignment, proportion, and balance.' },
+      { titleSuffix: 'High-Fidelity Physical Study', desc: 'Detailed prototype constructed for spatial validation and aesthetic excellence.' },
+      { titleSuffix: 'Master Presentation Model', desc: 'Finished physical scale showcase built to highest industrial and architectural standards.' }
+    ]
+  };
+
+  function switchUploadMode(mode) {
+    if (mode === 'bulk') {
+      if (modeBtnSingle) modeBtnSingle.classList.remove('active');
+      if (modeBtnBulk) modeBtnBulk.classList.add('active');
+      if (singleUploadForm) singleUploadForm.style.display = 'none';
+      if (bulkUploadSection) bulkUploadSection.style.display = 'flex';
+      populateProjectCategoryDropdown();
+    } else {
+      if (modeBtnBulk) modeBtnBulk.classList.remove('active');
+      if (modeBtnSingle) modeBtnSingle.classList.add('active');
+      if (bulkUploadSection) bulkUploadSection.style.display = 'none';
+      if (singleUploadForm) singleUploadForm.style.display = 'flex';
+    }
+  }
+
+  modeBtnSingle?.addEventListener('click', () => switchUploadMode('single'));
+  modeBtnBulk?.addEventListener('click', () => switchUploadMode('bulk'));
+
+  function cleanBaseFileName(name) {
+    if (!name) return '';
+    return name
+      .replace(/\.[^/.]+$/, '')
+      .replace(/^(IMG|DSC|PXL|PHOTO|PIC|SCAN|WhatsApp\s*Image|Screenshot)[_\-\s]*/i, '')
+      .replace(/[\-_]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function getSelectedCategoryPool() {
+    const catVal = bulkUploadCategory ? bulkUploadCategory.value : '';
+    const catObj = adminCategories.find(c => c.id === catVal || c.slug === catVal) || {};
+    const slug = (catObj.slug || catVal || '').toLowerCase();
+    
+    if (slug.includes('building') || slug.includes('architectural') || slug.includes('residential') || slug.includes('tower')) {
+      return { pool: CATEGORY_SCALE_ASPECTS['building-models'], name: catObj.name || 'Building Model' };
+    }
+    if (slug.includes('plant') || slug.includes('refinery') || slug.includes('industrial-plant')) {
+      return { pool: CATEGORY_SCALE_ASPECTS['plant-models'], name: catObj.name || 'Plant Model' };
+    }
+    if (slug.includes('machine') || slug.includes('mechanical') || slug.includes('equipment')) {
+      return { pool: CATEGORY_SCALE_ASPECTS['machine-models'], name: catObj.name || 'Machine Model' };
+    }
+    if (slug.includes('miniature') || slug.includes('diorama') || slug.includes('landscape')) {
+      return { pool: CATEGORY_SCALE_ASPECTS['miniature-models'], name: catObj.name || 'Miniature Model' };
+    }
+    if (slug.includes('monument') || slug.includes('heritage') || slug.includes('landmark')) {
+      return { pool: CATEGORY_SCALE_ASPECTS['monument-models'], name: catObj.name || 'Monument Model' };
+    }
+    if (slug.includes('3d') || slug.includes('print')) {
+      return { pool: CATEGORY_SCALE_ASPECTS['3d-printing'], name: catObj.name || '3D Printing Prototype' };
+    }
+    const catName = catObj.name || (bulkUploadCategory && bulkUploadCategory.selectedIndex >= 0 && bulkUploadCategory.value
+      ? (bulkUploadCategory.options[bulkUploadCategory.selectedIndex].getAttribute('data-name') || bulkUploadCategory.options[bulkUploadCategory.selectedIndex].text)
+      : 'Scale Model');
+    return { pool: CATEGORY_SCALE_ASPECTS['default'], name: catName };
+  }
+
+  function handleBulkFilesSelected(filesList) {
+    if (!filesList || filesList.length === 0) return;
+
+    let files = Array.from(filesList);
+    if (files.length > 20) {
+      showAdminToast('Maximum 20 images allowed per batch. Selecting first 20 photos.', 'warning');
+      files = files.slice(0, 20);
+    }
+
+    const { pool, name: catName } = getSelectedCategoryPool();
+    const baseTitle = bulkBaseTitleInput ? bulkBaseTitleInput.value.trim() : '';
+
+    const usedTitlesInBatch = new Set();
+    let poolIndex = 0;
+
+    stagedBulkFiles = files.map((file, idx) => {
+      const cleaned = cleanBaseFileName(file.name);
+      
+      let prefix = '';
+      if (baseTitle) {
+        prefix = baseTitle;
+      } else if (cleaned && cleaned.length > 2 && !/^\d+$/.test(cleaned)) {
+        prefix = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+      } else {
+        prefix = catName;
+      }
+
+      // Find an aspect whose title has not yet been used in this batch
+      let aspect = pool[poolIndex % pool.length];
+      let candidateTitle = `${prefix} — ${aspect.titleSuffix}`;
+      let attempts = 0;
+
+      while (usedTitlesInBatch.has(candidateTitle) && attempts < pool.length) {
+        poolIndex++;
+        aspect = pool[poolIndex % pool.length];
+        candidateTitle = `${prefix} — ${aspect.titleSuffix}`;
+        attempts++;
+      }
+
+      // If all pool variations are exhausted in the batch, append angle indicator
+      if (usedTitlesInBatch.has(candidateTitle)) {
+        let suffixNum = 2;
+        while (usedTitlesInBatch.has(`${candidateTitle} (Angle ${suffixNum})`)) {
+          suffixNum++;
+        }
+        candidateTitle = `${candidateTitle} (Angle ${suffixNum})`;
+      }
+
+      usedTitlesInBatch.add(candidateTitle);
+      poolIndex++;
+
+      return {
+        id: 'bulk_' + Date.now() + '_' + idx,
+        file: file,
+        title: candidateTitle,
+        description: aspect.desc,
+        previewUrl: URL.createObjectURL(file),
+        sizeKb: Math.round(file.size / 1024),
+        status: 'pending'
+      };
+    });
+
+    renderBulkPreviews();
+  }function renderBulkPreviews() {
+    if (!bulkPreviewGrid) return;
+    bulkPreviewGrid.innerHTML = '';
+
+    if (stagedBulkFiles.length === 0) {
+      if (bulkPreviewContainer) bulkPreviewContainer.style.display = 'none';
+      if (bulkCounterBar) bulkCounterBar.style.display = 'none';
+      if (bulkUploadSubmitBtn) bulkUploadSubmitBtn.disabled = true;
+      return;
+    }
+
+    if (bulkPreviewContainer) bulkPreviewContainer.style.display = 'block';
+    if (bulkCounterBar) bulkCounterBar.style.display = 'flex';
+    if (bulkCountDisplay) bulkCountDisplay.textContent = stagedBulkFiles.length;
+    if (bulkUploadSubmitBtn) bulkUploadSubmitBtn.disabled = false;
+
+    stagedBulkFiles.forEach((item, index) => {
+      const row = document.createElement('div');
+      row.className = `bulk-item-row ${item.status}`;
+      row.id = `bulkRow_${item.id}`;
+
+      row.innerHTML = `
+        <img src="${item.previewUrl}" alt="Preview" class="bulk-item-thumb" />
+        <div class="bulk-item-inputs">
+          <input type="text" class="bulk-item-title-input" value="${item.title.replace(/"/g, '&quot;')}" data-id="${item.id}" placeholder="Model title..." />
+          <div class="bulk-item-meta">
+            <span>${item.file.name} (${item.sizeKb} KB)</span>
+            <span class="bulk-item-status-text" id="bulkStatus_${item.id}" style="color:${item.status === 'completed' ? '#10B981' : 'var(--text-muted)'}; font-weight:600;">
+              ${item.status === 'completed' ? '✓ Ready in Portfolio' : `Photo ${index + 1} of ${stagedBulkFiles.length}`}
+            </span>
+          </div>
+        </div>
+        <button type="button" class="bulk-item-remove-btn" title="Remove photo" data-id="${item.id}">&times;</button>
+      `;
+
+      // Inline title edit listener
+      row.querySelector('.bulk-item-title-input')?.addEventListener('input', (e) => {
+        item.title = e.target.value.trim() || item.title;
+      });
+
+      // Remove button listener
+      row.querySelector('.bulk-item-remove-btn')?.addEventListener('click', () => {
+        removeBulkFile(item.id);
+      });
+
+      bulkPreviewGrid.appendChild(row);
+    });
+  }
+
+  function removeBulkFile(id) {
+    const idx = stagedBulkFiles.findIndex(x => x.id === id);
+    if (idx !== -1) {
+      try { URL.revokeObjectURL(stagedBulkFiles[idx].previewUrl); } catch (e) {}
+      stagedBulkFiles.splice(idx, 1);
+      renderBulkPreviews();
+    }
+  }
+
+  function clearBulkFiles() {
+    stagedBulkFiles.forEach(f => {
+      try { URL.revokeObjectURL(f.previewUrl); } catch (e) {}
+    });
+    stagedBulkFiles = [];
+    if (prjBulkFileInput) prjBulkFileInput.value = '';
+    renderBulkPreviews();
+  }
+
+  bulkResetBtn?.addEventListener('click', clearBulkFiles);
+
+  prjBulkFileInput?.addEventListener('change', (e) => {
+    handleBulkFilesSelected(e.target.files);
+  });
+
+  bulkBaseTitleInput?.addEventListener('input', () => {
+    if (stagedBulkFiles.length > 0 && prjBulkFileInput && prjBulkFileInput.files) {
+      handleBulkFilesSelected(prjBulkFileInput.files);
+    }
+  });
+
+  bulkUploadCategory?.addEventListener('change', () => {
+    if (stagedBulkFiles.length > 0 && prjBulkFileInput && prjBulkFileInput.files && prjBulkFileInput.files.length > 0) {
+      handleBulkFilesSelected(prjBulkFileInput.files);
+    }
+  });
+
+  bulkUploadSubmitBtn?.addEventListener('click', async () => {
+    const catSelect = document.getElementById('bulkUploadCategory');
+    const categoryId = catSelect ? catSelect.value : '';
+    const categoryName = (catSelect && catSelect.selectedIndex >= 0 && catSelect.options[catSelect.selectedIndex]?.getAttribute('data-name'))
+      || (catSelect && catSelect.selectedIndex >= 0 && catSelect.options[catSelect.selectedIndex]?.text) || '';
+
+    if (!categoryId) {
+      showAdminToast('Please select a model category for this batch.', 'warning');
+      return;
+    }
+    if (stagedBulkFiles.length === 0) {
+      showAdminToast('Please select photos to upload.', 'warning');
+      return;
+    }
+
+    bulkUploadSubmitBtn.disabled = true;
+    bulkUploadSubmitBtn.innerHTML = '<span class="upload-spinner"></span> <span>Uploading Batch...</span>';
+    if (bulkProgressBox) bulkProgressBox.style.display = 'block';
+
+    const total = stagedBulkFiles.length;
+    let completedCount = 0;
+    const sess = API.getSession();
+
+    for (let i = 0; i < total; i++) {
+      const item = stagedBulkFiles[i];
+      const currentNum = i + 1;
+      const remaining = total - currentNum;
+      const progressPercent = Math.round((i / total) * 100);
+
+      if (bulkProgressBarFill) bulkProgressBarFill.style.width = progressPercent + '%';
+      if (bulkProgressPct) bulkProgressPct.textContent = progressPercent + '%';
+      if (bulkProgressStageText) {
+        bulkProgressStageText.textContent = `Uploading photo ${currentNum} of ${total} (${remaining} remaining)...`;
+      }
+      if (bulkProgressDetails) {
+        bulkProgressDetails.textContent = `Processing: ${item.title}`;
+      }
+
+      const rowEl = document.getElementById(`bulkRow_${item.id}`);
+      if (rowEl) {
+        rowEl.classList.add('uploading');
+        const statusSpan = document.getElementById(`bulkStatus_${item.id}`);
+        if (statusSpan) statusSpan.textContent = 'Uploading to Drive & Sheet...';
+      }
+
+      // Convert file to base64
+      let base64Data = null;
+      try {
+        base64Data = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(item.file);
+        });
+      } catch (readErr) {
+        console.warn("Base64 read error:", readErr);
+      }
+
+      if (base64Data) {
+        let uploadSuccess = false;
+        try {
+          const res = await API.request({
+            action: 'upload_project_media',
+            token: sess ? sess.token : '',
+            title: item.title,
+            categoryId: categoryId,
+            categoryName: categoryName,
+            mediaType: 'image',
+            description: item.description,
+            fileBase64: base64Data,
+            fileName: item.file.name,
+            mimeType: item.file.type || 'image/jpeg'
+          });
+
+          if (res && res.status === 'success' && res.item) {
+            adminProjects.unshift(res.item);
+            uploadSuccess = true;
+          }
+        } catch (apiErr) {
+          console.warn("Bulk item network note:", apiErr);
+        }
+
+        if (!uploadSuccess) {
+          const localItem = {
+            id: 'PRJ-' + Date.now().toString(36) + '-' + i,
+            title: item.title,
+            categoryId: categoryId,
+            categoryName: categoryName,
+            mediaType: 'image',
+            mediaUrl: base64Data,
+            driveFileId: '',
+            description: item.description,
+            createdAt: new Date().toISOString()
+          };
+          adminProjects.unshift(localItem);
+        }
+      }
+
+      item.status = 'completed';
+      completedCount++;
+
+      if (rowEl) {
+        rowEl.classList.remove('uploading');
+        rowEl.classList.add('completed');
+        const statusSpan = document.getElementById(`bulkStatus_${item.id}`);
+        if (statusSpan) {
+          statusSpan.style.color = '#10B981';
+          statusSpan.textContent = '✓ Uploaded';
+        }
+      }
+    }
+
+    if (bulkProgressBarFill) bulkProgressBarFill.style.width = '100%';
+    if (bulkProgressPct) bulkProgressPct.textContent = '100%';
+    if (bulkProgressStageText) bulkProgressStageText.textContent = `Completed! All ${total} scale models published.`;
+    if (bulkProgressDetails) bulkProgressDetails.textContent = 'Master catalog updated successfully.';
+
+    localStorage.setItem('emm_projects', JSON.stringify(adminProjects));
+    window.dispatchEvent(new Event('storage'));
+    renderAdminProjectsTable();
+
+    showAdminToast(`Batch complete! Successfully published ${total} scale models.`, 'success');
+
+    setTimeout(() => {
+      bulkUploadSubmitBtn.disabled = false;
+      bulkUploadSubmitBtn.innerHTML = '<span>Upload Batch to Portfolio</span>';
+      if (bulkProgressBox) bulkProgressBox.style.display = 'none';
+      clearBulkFiles();
+      if (uploadPrjModal) uploadPrjModal.classList.remove('open');
+      switchUploadMode('single');
+    }, 1000);
   });
 
   window.deleteProjectMedia = async function (id) {
@@ -3065,6 +3973,8 @@ function initAdminDashboardApp() {
         console.warn("Project updated locally, cloud sync response:", err);
       }
     });
+
+
   }
 
   // --- FLOATING ACTION BAR CONTROLS ---
@@ -3074,6 +3984,10 @@ function initAdminDashboardApp() {
 
   if (fabAddProjectBtn) {
     fabAddProjectBtn.addEventListener('click', () => {
+      if (isMobileAdmin()) {
+        openPcOnlyModal('gallery');
+        return;
+      }
       const galleryTabBtn = document.querySelector('.admin-nav-item[data-tab="gallery"]');
       if (galleryTabBtn) galleryTabBtn.click();
       const uploadModal = document.getElementById('uploadPrjModal');
@@ -3100,12 +4014,21 @@ function initAdminDashboardApp() {
 
   if (fabBackToTopBtn) {
     fabBackToTopBtn.addEventListener('click', () => {
+      const mainPanel = document.querySelector('.admin-main-panel');
+      if (mainPanel) {
+        mainPanel.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+      document.body.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 
   // --- 7. TAB: INBOX & CONTACT MESSAGES (CACHE-FIRST) ---
 
+
+  let selectedMessageIds = new Set();
+  let adminMessagesListenersBound = false;
 
   function renderAdminMessagesTable() {
     const tbody = document.getElementById('adminMessagesTableBody');
@@ -3114,13 +4037,21 @@ function initAdminDashboardApp() {
 
     if (!adminMessages || adminMessages.length === 0) {
       tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 24px; color: var(--text-muted);">Inbox is clean. No incoming inquiries yet.</td></tr>`;
+      const master = document.getElementById('selectAllMessagesCheck');
+      if (master) { master.checked = false; master.indeterminate = false; }
+      const btn = document.getElementById('btnBatchDeleteMessages');
+      if (btn) btn.style.display = 'none';
       return;
     }
 
     const canReply = hasPerm('messages_reply');
     adminMessages.forEach(msg => {
+      const isChecked = selectedMessageIds.has(msg.id);
       const tr = document.createElement('tr');
       tr.innerHTML = `
+        <td style="width:36px; text-align:center;">
+          <input type="checkbox" class="message-row-check" data-id="${msg.id}" ${isChecked ? 'checked' : ''} style="cursor:pointer;" title="Select Inquiry">
+        </td>
         <td><strong>${msg.name}</strong><br><small style="color:var(--text-muted);">${msg.email || msg.phone}</small></td>
         <td>${msg.service || 'General'}</td>
         <td style="max-width: 280px; font-size: 0.85rem;">${msg.message}</td>
@@ -3135,13 +4066,76 @@ function initAdminDashboardApp() {
       `;
       tbody.appendChild(tr);
     });
+
+    const masterCheck = document.getElementById('selectAllMessagesCheck');
+    if (masterCheck) {
+      const allIds = adminMessages.map(m => m.id);
+      const allSelected = allIds.length > 0 && allIds.every(id => selectedMessageIds.has(id));
+      const someSelected = allIds.some(id => selectedMessageIds.has(id));
+      masterCheck.checked = allSelected;
+      masterCheck.indeterminate = !allSelected && someSelected;
+    }
+
+    const batchBtn = document.getElementById('btnBatchDeleteMessages');
+    const batchText = document.getElementById('batchDeleteMessagesText');
+    if (batchBtn) {
+      batchBtn.style.display = selectedMessageIds.size > 0 ? 'inline-flex' : 'none';
+      if (batchText) {
+        batchText.textContent = `Delete Selected Inquiries (${selectedMessageIds.size})`;
+      }
+    }
+
+    tbody.querySelectorAll('.message-row-check').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const id = e.target.getAttribute('data-id');
+        if (e.target.checked) selectedMessageIds.add(id);
+        else selectedMessageIds.delete(id);
+        renderAdminMessagesTable();
+      });
+    });
+
+    if (!adminMessagesListenersBound) {
+      adminMessagesListenersBound = true;
+      document.getElementById('selectAllMessagesCheck')?.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        adminMessages.forEach(m => {
+          if (isChecked) selectedMessageIds.add(m.id);
+          else selectedMessageIds.delete(m.id);
+        });
+        renderAdminMessagesTable();
+      });
+
+      document.getElementById('btnBatchDeleteMessages')?.addEventListener('click', () => {
+        window.deleteBatchMessages();
+      });
+    }
   }
 
-  async function loadAdminMessages() {
+  window.deleteBatchMessages = async function () {
+    if (selectedMessageIds.size === 0) return;
+    const count = selectedMessageIds.size;
+    if (!confirm(`Permanently delete ${count} selected client inquiries?`)) return;
+
+    const idsToDelete = Array.from(selectedMessageIds);
+    adminMessages = adminMessages.filter(m => !idsToDelete.includes(m.id));
+    localStorage.setItem('emm_messages', JSON.stringify(adminMessages));
+    selectedMessageIds.clear();
+    renderAdminMessagesTable();
+    showAdminToast(`${count} inquiries deleted.`, 'info');
+
+    const sess = API.getSession();
+    const token = sess ? sess.token : '';
+    for (const id of idsToDelete) {
+      try {
+        await API.request({ action: 'delete_message', token: token, id: id });
+      } catch (e) {}
+    }
+  };async function loadAdminMessages() {
     renderAdminMessagesTable(); // 0ms instant display
     const sess = API.getSession();
+    const adminEmail = (currentUser && currentUser.email) || (sess && sess.email) || '';
     try {
-      const res = await API.request({ action: 'get_messages', token: sess ? sess.token : '' });
+      const res = await API.request({ action: 'get_messages', token: sess ? sess.token : '', adminEmail: adminEmail });
       if (res && res.status === 'success' && Array.isArray(res.messages)) {
         if (previousMessagesCount !== null && res.messages.length > previousMessagesCount) {
           const diff = res.messages.length - previousMessagesCount;
@@ -3181,25 +4175,38 @@ function initAdminDashboardApp() {
 
   // --- 8. TAB: USER FEEDBACK MODERATION (CACHE-FIRST) ---
 
+  let selectedFeedbackIds = new Set();
+  let adminFeedbackListenersBound = false;
+
   function renderAdminFeedbackTable() {
     const tbody = document.getElementById('adminFeedbackTableBody');
     if (!tbody) return;
     tbody.innerHTML = '';
 
     if (!adminFeedback || adminFeedback.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 24px; color: var(--text-muted);">No reviews submitted yet.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 24px; color: var(--text-muted);">No reviews submitted yet.</td></tr>`;
+      const master = document.getElementById('selectAllFeedbackCheck');
+      if (master) { master.checked = false; master.indeterminate = false; }
+      const bApprove = document.getElementById('btnBatchApproveFeedback');
+      if (bApprove) bApprove.style.display = 'none';
+      const bDelete = document.getElementById('btnBatchDeleteFeedback');
+      if (bDelete) bDelete.style.display = 'none';
       return;
     }
 
     const canModerate = hasPerm('feedback_moderate');
     adminFeedback.forEach(f => {
+      const isChecked = selectedFeedbackIds.has(f.id);
       const tr = document.createElement('tr');
       tr.innerHTML = `
+        <td style="width:36px; text-align:center;">
+          <input type="checkbox" class="feedback-row-check" data-id="${f.id}" ${isChecked ? 'checked' : ''} style="cursor:pointer;" title="Select Review">
+        </td>
         <td>
           <strong>${f.name}</strong>
-          ${f.role || f.relativeDate ? `<br><small style="color:var(--text-muted); font-size:0.75rem;">${f.role || 'Verified Client'}${f.relativeDate ? ` • ${f.relativeDate}` : ''}</small>` : ''}
+          ${f.role || f.relativeDate ? `<br><small style="color:var(--text-muted); font-size:0.75rem;">${f.role || 'Verified Client'}${f.relativeDate ? ` â€¢ ${f.relativeDate}` : ''}</small>` : ''}
         </td>
-        <td><span style="color:#F59E0B; letter-spacing:2px;">${'★'.repeat(f.rating || 5)}</span></td>
+        <td><span style="color:#F59E0B; letter-spacing:2px;">${'â˜…'.repeat(f.rating || 5)}</span></td>
         <td style="max-width: 300px; font-size: 0.86rem; line-height: 1.45;">"${f.comment}"</td>
         <td><span class="badge-tag ${f.isApproved ? 'badge-owner' : 'badge-developer'}">${f.isApproved ? 'Approved' : 'Pending'}</span></td>
         <td style="text-align: right; white-space: nowrap;">
@@ -3211,13 +4218,106 @@ function initAdminDashboardApp() {
       `;
       tbody.appendChild(tr);
     });
+
+    const masterCheck = document.getElementById('selectAllFeedbackCheck');
+    if (masterCheck) {
+      const allIds = adminFeedback.map(f => f.id);
+      const allSelected = allIds.length > 0 && allIds.every(id => selectedFeedbackIds.has(id));
+      const someSelected = allIds.some(id => selectedFeedbackIds.has(id));
+      masterCheck.checked = allSelected;
+      masterCheck.indeterminate = !allSelected && someSelected;
+    }
+
+    const batchApproveBtn = document.getElementById('btnBatchApproveFeedback');
+    const batchApproveText = document.getElementById('batchApproveFeedbackText');
+    const batchDeleteBtn = document.getElementById('btnBatchDeleteFeedback');
+    const batchDeleteText = document.getElementById('batchDeleteFeedbackText');
+
+    if (batchApproveBtn) {
+      batchApproveBtn.style.display = selectedFeedbackIds.size > 0 ? 'inline-flex' : 'none';
+      if (batchApproveText) batchApproveText.textContent = `Approve Selected (${selectedFeedbackIds.size})`;
+    }
+    if (batchDeleteBtn) {
+      batchDeleteBtn.style.display = selectedFeedbackIds.size > 0 ? 'inline-flex' : 'none';
+      if (batchDeleteText) batchDeleteText.textContent = `Delete Selected (${selectedFeedbackIds.size})`;
+    }
+
+    tbody.querySelectorAll('.feedback-row-check').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const id = e.target.getAttribute('data-id');
+        if (e.target.checked) selectedFeedbackIds.add(id);
+        else selectedFeedbackIds.delete(id);
+        renderAdminFeedbackTable();
+      });
+    });
+
+    if (!adminFeedbackListenersBound) {
+      adminFeedbackListenersBound = true;
+      document.getElementById('selectAllFeedbackCheck')?.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        adminFeedback.forEach(f => {
+          if (isChecked) selectedFeedbackIds.add(f.id);
+          else selectedFeedbackIds.delete(f.id);
+        });
+        renderAdminFeedbackTable();
+      });
+
+      document.getElementById('btnBatchApproveFeedback')?.addEventListener('click', () => {
+        window.approveBatchFeedback();
+      });
+
+      document.getElementById('btnBatchDeleteFeedback')?.addEventListener('click', () => {
+        window.deleteBatchFeedback();
+      });
+    }
   }
 
-  async function loadAdminFeedback() {
+  window.approveBatchFeedback = async function () {
+    if (selectedFeedbackIds.size === 0) return;
+    const count = selectedFeedbackIds.size;
+    const idsToApprove = Array.from(selectedFeedbackIds);
+    adminFeedback.forEach(f => {
+      if (idsToApprove.includes(f.id)) f.isApproved = true;
+    });
+    localStorage.setItem('emm_feedback', JSON.stringify(adminFeedback));
+    selectedFeedbackIds.clear();
+    renderAdminFeedbackTable();
+    showAdminToast(`${count} review${count > 1 ? 's' : ''} approved and published.`, 'success');
+
+    const sess = API.getSession();
+    const token = sess ? sess.token : '';
+    for (const id of idsToApprove) {
+      try {
+        await API.request({ action: 'toggle_feedback', token, id, isApproved: true });
+      } catch (e) {}
+    }
+  };
+
+  window.deleteBatchFeedback = async function () {
+    if (selectedFeedbackIds.size === 0) return;
+    const count = selectedFeedbackIds.size;
+    if (!confirm(`Permanently delete ${count} selected review${count > 1 ? 's' : ''}?`)) return;
+
+    const idsToDelete = Array.from(selectedFeedbackIds);
+    adminFeedback = adminFeedback.filter(f => !idsToDelete.includes(f.id));
+    localStorage.setItem('emm_feedback', JSON.stringify(adminFeedback));
+    selectedFeedbackIds.clear();
+    renderAdminFeedbackTable();
+    showAdminToast(`${count} review${count > 1 ? 's' : ''} deleted.`, 'info');
+
+    const sess = API.getSession();
+    const token = sess ? sess.token : '';
+    for (const id of idsToDelete) {
+      try {
+        await API.request({ action: 'delete_feedback', token, id });
+      } catch (e) {}
+    }
+  };async function loadAdminFeedback() {
     renderAdminFeedbackTable(); // 0ms instant display
     const sess = API.getSession();
+    const adminEmail = (currentUser && currentUser.email) || (sess && sess.email) || '';
     try {
-      const res = await API.request({ action: 'get_all_feedback', token: sess ? sess.token : '' });
+      const res = await API.request({ action: 'get_all_feedback', token: sess ? sess.token : '', adminEmail: adminEmail });
       if (res && res.status === 'success' && Array.isArray(res.feedback) && res.feedback.length > 0) {
         if (previousFeedbackCount !== null && res.feedback.length > previousFeedbackCount) {
           const diff = res.feedback.length - previousFeedbackCount;
@@ -3294,8 +4394,9 @@ function initAdminDashboardApp() {
   async function loadAdminWorkers() {
     renderAdminWorkersTable(); // 0ms instant display
     const sess = API.getSession();
+    const adminEmail = (currentUser && currentUser.email) || (sess && sess.email) || '';
     try {
-      const res = await API.request({ action: 'get_workers', token: sess ? sess.token : '' });
+      const res = await API.request({ action: 'get_workers', token: sess ? sess.token : '', adminEmail: adminEmail });
       if (res && res.status === 'success' && Array.isArray(res.workers)) {
         adminWorkers = res.workers;
         localStorage.setItem('emm_workers', JSON.stringify(adminWorkers));
@@ -3577,9 +4678,11 @@ function initAdminDashboardApp() {
     showAdminToast(`Worker "${name}" updated successfully!`, 'success');
 
     const sess = API.getSession();
+    const adminEmail = (currentUser && currentUser.email) || (sess && sess.email) || '';
     const payload = {
       action: 'update_worker',
       token: sess ? sess.token : '',
+      adminEmail: adminEmail,
       email: email,
       name: name,
       designation: designation,
@@ -3670,9 +4773,11 @@ function initAdminDashboardApp() {
     showAdminToast(`Worker account created! Syncing to backend...`, 'info');
 
     const sess = API.getSession();
+    const adminEmail = (currentUser && currentUser.email) || (sess && sess.email) || '';
     const payload = {
       action: 'create_worker',
       token: sess ? sess.token : '',
+      adminEmail: adminEmail,
       name: name,
       email: email,
       designation: designation,
@@ -3702,16 +4807,30 @@ function initAdminDashboardApp() {
   });
 
   window.deleteWorker = async function (email) {
-    if (!confirm(`Are you sure you want to remove worker account for ${email}?`)) return;
+    if (!confirm(`Are you sure you want to permanently remove staff account for ${email}?`)) return;
 
     adminWorkers = adminWorkers.filter(w => w.email.toLowerCase() !== email.toLowerCase());
+    localStorage.setItem('emm_workers', JSON.stringify(adminWorkers));
     renderAdminWorkersTable();
-    showAdminToast(`Worker ${email} removed.`, 'info');
+    showAdminToast(`Worker ${email} removed locally. Syncing with database...`, 'info');
 
     const sess = API.getSession();
-    const res = await API.request({ action: 'delete_worker', token: sess ? sess.token : '', email: email });
-    if (!res || res.status !== 'success') {
-      showAdminToast((res && res.message) || 'Error deleting worker on backend.', 'error');
+    const adminEmail = (currentUser && currentUser.email) || (sess && sess.email) || '';
+    try {
+      const res = await API.request({
+        action: 'delete_worker',
+        token: sess ? sess.token : '',
+        adminEmail: adminEmail,
+        email: email
+      });
+      if (res && res.status === 'success') {
+        showAdminToast(res.message || 'Worker permanently deleted from database.', 'success');
+        loadAdminWorkers();
+      } else {
+        showAdminToast((res && res.message) || 'Error deleting worker on backend.', 'warning');
+      }
+    } catch (err) {
+      console.warn("Delete worker API note:", err);
     }
   };
 
@@ -3917,6 +5036,8 @@ function initAdminDashboardApp() {
         showAdminToast('URLs saved to browser storage. Verify deployment permissions.', 'warning');
       }
     });
+
+
   }
 
   // --- EXPOSE GLOBAL METHODS FOR FAIL-SAFE INLINE HANDLERS ---

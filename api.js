@@ -9,8 +9,8 @@
  */
 
 const API = (function () {
-  const DEFAULT_ADMIN_URL = 'https://script.google.com/macros/s/AKfycby1qRlUg1ogRHtjv5QB2vvh5n_QaILLG3tHzPEgqJc2YEOw72zu0DIazzNFtaHjBt-K_g/exec';
-  const DEFAULT_GALLERY_URL = 'https://script.google.com/macros/s/AKfycbxQiyfvhwPQ_ob93_Da1cbXSOVTZUdltj9dg-uMAo3o2WOu7rT0Yh4AuZiACx1K1xuV/exec';
+  const DEFAULT_ADMIN_URL = 'https://script.google.com/macros/s/AKfycbw5FqBE9m1DEnZCrK-9z762Dyd3FxnBmcZJ_j8hSx3_DI5KWXCQFTKTYly6XGFhVm9FQA/exec';
+  const DEFAULT_GALLERY_URL = 'https://script.google.com/macros/s/AKfycbzoqjsSXDjIVS2sOW3yWiM1eeBl6FANSQBlfSJVZrWqT_VjANaEDPI4OnaDDWCLdwy0/exec';
   
   const memoryStore = {};
   function safeStorageGet(key) {
@@ -30,15 +30,16 @@ const API = (function () {
     } catch (e) {}
   }
 
-  // Auto-upgrade if empty or old deployment URL was stored
+  // Auto-upgrade stored URLs to current production endpoints
   let storedAdmin = safeStorageGet('emm_admin_script_url') || safeStorageGet('emm_script_url');
-  if (!storedAdmin || storedAdmin.indexOf('AKfycbw3SJfXJcCf4PKKDwfKe3Q0lXuQfNdvsxvf6_kMeUT3nfRIRe0p_sH7FvLuP5nmHosFXA') !== -1) {
+  if (!storedAdmin || storedAdmin !== DEFAULT_ADMIN_URL) {
     storedAdmin = DEFAULT_ADMIN_URL;
     safeStorageSet('emm_admin_script_url', DEFAULT_ADMIN_URL);
+    safeStorageSet('emm_script_url', DEFAULT_ADMIN_URL);
   }
 
   let storedGallery = safeStorageGet('emm_gallery_script_url');
-  if (!storedGallery || storedGallery.indexOf('AKfycbw3SJfXJcCf4PKKDwfKe3Q0lXuQfNdvsxvf6_kMeUT3nfRIRe0p_sH7FvLuP5nmHosFXA') !== -1) {
+  if (!storedGallery || storedGallery !== DEFAULT_GALLERY_URL) {
     storedGallery = DEFAULT_GALLERY_URL;
     safeStorageSet('emm_gallery_script_url', DEFAULT_GALLERY_URL);
   }

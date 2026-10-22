@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin • Expressive Model Making</title>
+  <title>Studio Admin Portal | Expressive — Model Making Co., Mumbai</title>
   
   <meta name="robots" content="noindex, nofollow">
   
@@ -249,18 +249,28 @@
         </div>
       </div>
 
+      <!-- Mobile Restricted Mode Notice (visible on mobile screens < 992px) -->
+      <div class="admin-mobile-notice-banner" id="adminMobileNoticeBanner" style="display:none;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          <span><strong>Mobile Mode:</strong> Client Reviews moderation is active. Full studio operations (Analytics, Showcase, Inquiries, Staff, and Settings) require a PC or desktop computer.</span>
+        </div>
+      </div>
+
       <!-- TAB 1: OVERVIEW & ADVANCED ANALYTICS -->
       <section class="admin-tab-content active" id="tab-overview">
         <!-- Analytics Period Filter Bar & Quick Export (Strictly From 1st October) -->
         <div class="overview-toolbar">
           <div class="overview-period-pills" id="overviewPeriodPills">
-            <button type="button" class="period-pill active" data-period="7d">Last 7 Days (Oct 09 – 15)</button>
-            <button type="button" class="period-pill" data-period="14d">Last 14 Days (Oct 02 – 15)</button>
-            <button type="button" class="period-pill" data-period="all">All Time (From 1st Oct)</button>
+            <button type="button" class="period-pill active" data-period="7d">Last 7 Days</button>
+            <button type="button" class="period-pill" data-period="14d">Last 14 Days</button>
+            <button type="button" class="period-pill" data-period="all">All Time (From Oct 01, 2026)</button>
           </div>
           <div class="overview-export-group">
             <button type="button" class="btn-secondary" id="pushNotificationToggleBtn" title="Desktop & Mobile Push Alerts" style="font-size:0.82rem; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;">
-              <span id="pushNotificationBellIcon">🔔</span>
+              <span id="pushNotificationBellIcon" style="display:inline-flex; align-items:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              </span>
               <span id="pushNotificationStatusText">Enable Push Alerts</span>
             </button>
             <button type="button" class="btn-secondary" id="exportInquiriesCsvBtn" title="Export Inquiries to CSV">
@@ -498,19 +508,46 @@
         </div>
 
         <div class="admin-panel-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
             <div>
               <h3>Project Media Showcase</h3>
               <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">Upload project photos & videos. Automatically published to your live studio catalog.</p>
             </div>
-            <button class="btn-primary btn-bloat" id="openUploadPrjModalBtn" style="font-size:0.85rem; padding:8px 18px;">
+            <button class="btn-primary" id="openUploadPrjModalBtn" style="font-size:0.85rem; padding:8px 18px;">
               + Upload Project Media
             </button>
           </div>
+
+          <!-- Project Sorting & Batch Action Toolbar -->
+          <div class="admin-table-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; background:rgba(255,255,255,0.02); padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <input type="text" id="adminProjectSearchInput" placeholder="Filter projects by title..." class="admin-input" style="max-width:220px; font-size:0.82rem; padding:6px 12px;">
+              <select id="adminProjectCategoryFilter" class="admin-select" style="font-size:0.82rem; padding:6px 12px;">
+                <option value="all">All Categories</option>
+              </select>
+              <select id="adminProjectSortSelect" class="admin-select" style="font-size:0.82rem; padding:6px 12px;">
+                <option value="newest">Sort: Newest First</option>
+                <option value="oldest">Sort: Oldest First</option>
+                <option value="title-asc">Sort: Title (A → Z)</option>
+                <option value="title-desc">Sort: Title (Z → A)</option>
+                <option value="category">Sort: Category</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" class="btn-secondary" id="btnBatchDeleteProjects" style="display:none; color:#EF4444; border-color:rgba(239,68,68,0.4); font-size:0.82rem; padding:6px 14px; align-items:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span id="batchDeleteProjectsText">Delete Selected (0)</span>
+              </button>
+            </div>
+          </div>
+
           <div class="admin-table-responsive">
             <table class="admin-table">
               <thead>
                 <tr>
+                  <th style="width:36px; text-align:center;">
+                    <input type="checkbox" id="selectAllProjectsCheck" title="Select All Projects">
+                  </th>
                   <th style="width:70px;">Preview</th>
                   <th>Title</th>
                   <th>Category</th>
@@ -527,12 +564,25 @@
       <!-- TAB 3: INQUIRIES INBOX -->
       <section class="admin-tab-content" id="tab-messages">
         <div class="admin-panel-card">
-          <h3 style="margin-bottom:6px;">Client Inquiries & Quote Requests</h3>
-          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Direct customer leads submitted via website contact form.</p>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+            <div>
+              <h3 style="margin-bottom:4px;">Client Inquiries & Quote Requests</h3>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">Direct customer leads submitted via website contact form.</p>
+            </div>
+            <div>
+              <button type="button" class="btn-secondary" id="btnBatchDeleteMessages" style="display:none; color:#EF4444; border-color:rgba(239,68,68,0.4); font-size:0.82rem; padding:6px 14px; align-items:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span id="batchDeleteMessagesText">Delete Selected Inquiries (0)</span>
+              </button>
+            </div>
+          </div>
           <div class="admin-table-responsive">
             <table class="admin-table">
               <thead>
                 <tr>
+                  <th style="width:36px; text-align:center;">
+                    <input type="checkbox" id="selectAllMessagesCheck" title="Select All Inquiries">
+                  </th>
                   <th>Contact</th>
                   <th>Service</th>
                   <th>Message</th>
@@ -550,12 +600,28 @@
       <!-- TAB 4: CLIENT FEEDBACK -->
       <section class="admin-tab-content" id="tab-feedback">
         <div class="admin-panel-card">
-          <h3 style="margin-bottom:6px;">Customer Reviews & Moderation</h3>
-          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Approve testimonials to publish them on the public Reviews page.</p>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+            <div>
+              <h3 style="margin-bottom:4px;">Customer Reviews & Moderation</h3>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">Approve testimonials to publish them on the public Reviews page.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn-secondary" id="btnBatchApproveFeedback" style="display:none; color:#10B981; border-color:rgba(16,185,129,0.4); font-size:0.82rem; padding:6px 14px; align-items:center; gap:6px;">
+                <span id="batchApproveFeedbackText">Approve Selected (0)</span>
+              </button>
+              <button type="button" class="btn-secondary" id="btnBatchDeleteFeedback" style="display:none; color:#EF4444; border-color:rgba(239,68,68,0.4); font-size:0.82rem; padding:6px 14px; align-items:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span id="batchDeleteFeedbackText">Delete Selected (0)</span>
+              </button>
+            </div>
+          </div>
           <div class="admin-table-responsive">
             <table class="admin-table">
               <thead>
                 <tr>
+                  <th style="width:36px; text-align:center;">
+                    <input type="checkbox" id="selectAllFeedbackCheck" title="Select All Testimonials">
+                  </th>
                   <th>Client Name</th>
                   <th>Rating</th>
                   <th>Testimonial</th>
@@ -756,13 +822,28 @@
     </div>
   </div>
 
-  <!-- Modal: Upload Project Media -->
+  <!-- Modal: Upload Project Media (Single + Bulk Upload Modes) -->
   <div class="admin-modal-overlay" id="uploadPrjModal">
-    <div class="admin-modal-box" style="max-width: 620px;">
+    <div class="admin-modal-box" style="max-width: 720px; width: 94vw;">
       <div class="admin-modal-header">
-        <h3>Upload Scale Model Showcase</h3>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          <h3 style="margin:0; font-size:1.15rem;" id="uploadModalTitle">Upload Scale Model Showcase</h3>
+        </div>
         <button class="drawer-close" id="uploadPrjModalClose">&times;</button>
       </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div class="upload-mode-nav" style="display:flex; background:rgba(255,255,255,0.06); padding:4px; border-radius:var(--radius-full); margin-bottom:16px; gap:4px;">
+        <button type="button" class="upload-mode-tab active" id="modeBtnSingle" style="flex:1; padding:8px 16px; border:none; border-radius:var(--radius-full); background:var(--primary); color:#FFFFFF; font-weight:700; font-size:0.85rem; cursor:pointer; transition:all 0.2s ease;">
+          Single Showcase Upload
+        </button>
+        <button type="button" class="upload-mode-tab" id="modeBtnBulk" style="flex:1; padding:8px 16px; border:none; border-radius:var(--radius-full); background:transparent; color:var(--text-muted); font-weight:700; font-size:0.85rem; cursor:pointer; transition:all 0.2s ease;">
+          Bulk Upload (Up to 20 Photos)
+        </button>
+      </div>
+
+      <!-- MODE 1: SINGLE PROJECT UPLOAD FORM -->
       <form id="uploadPrjForm" style="display:flex; flex-direction:column; gap:14px;">
         <div class="form-group">
           <label for="prjTitleInput">Project Title *</label>
@@ -825,6 +906,62 @@
           <span>Publish Model to Portfolio</span>
         </button>
       </form>
+
+      <!-- MODE 2: BULK PHOTO UPLOAD FORM (UP TO 20 IMAGES) -->
+      <div id="bulkUploadSection" style="display:none; flex-direction:column; gap:14px;">
+        <div class="form-group">
+          <label for="bulkUploadCategory">Select Model Category for Batch *</label>
+          <select id="bulkUploadCategory" required style="width:100%; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); background:var(--bg-card); color:var(--text-main);"></select>
+          <small style="color:var(--text-muted); font-size:0.75rem; margin-top:3px; display:block;">
+            All images in this batch will be published under this selected category.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="bulkBaseTitleInput">Series Title / Project Prefix (Optional)</label>
+          <input type="text" id="bulkBaseTitleInput" placeholder="e.g. Lodha Park Tower (leave blank to auto-name from category & craftsmanship)">
+          <small style="color:var(--text-muted); font-size:0.75rem; margin-top:3px; display:block;">
+            Each photo automatically receives an authentic architectural specification title and description.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="prjBulkFileInput">Select Up to 20 Photos *</label>
+          <input type="file" id="prjBulkFileInput" multiple accept="image/jpeg,image/png,image/webp,image/avif" style="width:100%; padding:10px; border-radius:var(--radius-sm); border:1px dashed var(--border-subtle); background:rgba(255,255,255,0.02); color:var(--text-main); cursor:pointer;">
+        </div>
+
+        <!-- Bulk Selection Counter & Clear Bar -->
+        <div id="bulkCounterBar" style="display:none; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,0.04); border-radius:var(--radius-sm); font-size:0.82rem;">
+          <div>
+            <span>Selected for Upload: <strong id="bulkCountDisplay" style="color:var(--primary); font-size:0.9rem;">0</strong> / 20 photos</span>
+          </div>
+          <button type="button" id="bulkResetBtn" style="background:none; border:none; color:#EF4444; font-size:0.78rem; font-weight:700; cursor:pointer;">Clear All</button>
+        </div>
+
+        <!-- Bulk Preview Card Grid -->
+        <div class="bulk-preview-container" id="bulkPreviewContainer" style="display:none; max-height:280px; overflow-y:auto; padding:8px; background:rgba(0,0,0,0.3); border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+          <div class="bulk-preview-grid" id="bulkPreviewGrid" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <!-- Smooth Sequential Bulk Progress Tracker -->
+        <div class="upload-progress-box" id="bulkProgressBox" style="display:none; margin-top:4px;">
+          <div class="upload-progress-top">
+            <div class="upload-progress-stage">
+              <span class="upload-spinner"></span>
+              <span id="bulkProgressStageText" style="font-weight:600;">Uploading photo 1 of 10 (9 remaining)...</span>
+            </div>
+            <span class="upload-progress-pct" id="bulkProgressPct" style="font-weight:700; color:var(--primary);">0%</span>
+          </div>
+          <div class="upload-progress-bar-track" style="height:8px; border-radius:4px; background:rgba(255,255,255,0.08); overflow:hidden; margin-top:6px;">
+            <div class="upload-progress-bar-fill" id="bulkProgressBarFill" style="width:0%; height:100%; background:linear-gradient(90deg, var(--primary) 0%, #FF4D6D 100%); transition:width 0.35s ease;"></div>
+          </div>
+          <div id="bulkProgressDetails" style="font-size:0.75rem; color:var(--text-muted); margin-top:6px; text-align:center;">Preparing batch upload...</div>
+        </div>
+
+        <button type="button" class="btn-primary btn-bloat" id="bulkUploadSubmitBtn" style="width:100%; margin-top:6px;" disabled>
+          <span>Upload Batch to Portfolio</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1109,13 +1246,16 @@
     </button>
   </div>
 
-  <!-- OVERPOWERED GRAPH EXPORT MODAL (JPEG INFOGRAPHIC GENERATOR) -->
+  <!-- STUDIO GRAPH EXPORT MODAL (JPEG INFOGRAPHIC GENERATOR) -->
   <div class="admin-modal-overlay" id="adminExportGraphModal" style="display:none;">
-    <div class="admin-modal-box export-graph-modal-box" style="max-width:960px; width:94vw;">
+    <div class="admin-modal-box export-graph-modal-box" style="max-width:1180px; width:95vw;">
       <div class="admin-modal-header">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:1.3rem;">📊</span>
-          <h3 style="margin:0; font-size:1.15rem;">Export Studio Analytics Infographic (JPEG)</h3>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--primary);"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+          <div>
+            <h3 style="margin:0; font-size:1.18rem; font-weight:700;">Export Studio Analytics Infographic (JPEG)</h3>
+            <p style="margin:0; font-size:0.78rem; color:var(--text-muted);">High-resolution presentation export with customized branding and metric benchmarks.</p>
+          </div>
         </div>
         <button type="button" class="drawer-close" id="closeExportGraphModalBtn">&times;</button>
       </div>
@@ -1127,91 +1267,117 @@
           </div>
           <div class="export-preview-footbar">
             <span>Live Infographic Preview • High-Res Canvas Rendering</span>
-            <span id="exportCanvasDimensions">1600 × 900 px</span>
+            <span id="exportCanvasDimensions" style="font-family:monospace; font-weight:700; color:var(--primary);">1600 × 900 px</span>
           </div>
         </div>
 
-        <!-- Right: Overpowered Customization Controls -->
+        <!-- Right: Studio Customization Controls -->
         <div class="export-controls-column">
-          <div class="export-ctrl-group">
-            <label class="export-ctrl-label" for="exportGraphTitleInput">Infographic Title</label>
-            <input type="text" id="exportGraphTitleInput" class="admin-input" value="EXPRESSIVE MODEL MAKING CO. — STUDIO OPERATIONS ANALYTICS">
+          <div class="export-control-card" style="display:flex; flex-direction:column; gap:12px; background:rgba(255,255,255,0.02); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px;">
+            <div class="export-ctrl-group">
+              <label class="export-ctrl-label" for="exportGraphTitleInput">Infographic Title</label>
+              <input type="text" id="exportGraphTitleInput" class="admin-input" value="EXPRESSIVE MODEL MAKING CO., MUMBAI — STUDIO OPERATIONS ANALYTICS">
+            </div>
+
+            <div class="export-ctrl-group">
+              <label class="export-ctrl-label" for="exportGraphSubInput">Subtitle & Period Description</label>
+              <input type="text" id="exportGraphSubInput" class="admin-input" value="From October 01, 2026 to Today • Verified Studio Metric Performance">
+            </div>
           </div>
 
-          <div class="export-ctrl-group">
-            <label class="export-ctrl-label" for="exportGraphSubInput">Subtitle & Period Description</label>
-            <input type="text" id="exportGraphSubInput" class="admin-input" value="October 01 – 15, 2026 • Verified Studio Metric Performance">
-          </div>
+          <div class="export-control-card" style="display:flex; flex-direction:column; gap:12px; background:rgba(255,255,255,0.02); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px;">
+            <div class="export-ctrl-group">
+              <label class="export-ctrl-label">Color Theme Accent</label>
+              <div class="export-color-presets" id="exportColorPresets">
+                <button type="button" class="export-color-chip active" data-color="#C41E3A" data-sub="#FF4D6D" style="background:#C41E3A;" title="Carmine Red (Studio Signature)"></button>
+                <button type="button" class="export-color-chip" data-color="#3B82F6" data-sub="#60A5FA" style="background:#3B82F6;" title="Engineering Blue"></button>
+                <button type="button" class="export-color-chip" data-color="#10B981" data-sub="#34D399" style="background:#10B981;" title="Emerald Matrix"></button>
+                <button type="button" class="export-color-chip" data-color="#F59E0B" data-sub="#FBBF24" style="background:#F59E0B;" title="Industrial Amber"></button>
+                <button type="button" class="export-color-chip" data-color="#8B5CF6" data-sub="#C4B5FD" style="background:#8B5CF6;" title="Precision Purple"></button>
+                <div style="display:flex; align-items:center; gap:6px; margin-left:4px;">
+                  <input type="color" id="exportCustomColorPicker" value="#C41E3A" title="Custom Accent Color" style="width:32px; height:32px; border:none; border-radius:50%; cursor:pointer; background:none;">
+                </div>
+              </div>
+            </div>
 
-          <div class="export-ctrl-group">
-            <label class="export-ctrl-label">Color Theme Preset</label>
-            <div class="export-color-presets" id="exportColorPresets">
-              <button type="button" class="export-color-chip active" data-color="#C41E3A" data-sub="#FF4D6D" style="background:#C41E3A;" title="Carmine Red (Studio Signature)"></button>
-              <button type="button" class="export-color-chip" data-color="#3B82F6" data-sub="#60A5FA" style="background:#3B82F6;" title="Engineering Blue"></button>
-              <button type="button" class="export-color-chip" data-color="#10B981" data-sub="#34D399" style="background:#10B981;" title="Emerald Matrix"></button>
-              <button type="button" class="export-color-chip" data-color="#F59E0B" data-sub="#FBBF24" style="background:#F59E0B;" title="Industrial Amber"></button>
-              <button type="button" class="export-color-chip" data-color="#8B5CF6" data-sub="#C4B5FD" style="background:#8B5CF6;" title="Precision Purple"></button>
-              <div style="display:flex; align-items:center; gap:6px;">
-                <input type="color" id="exportCustomColorPicker" value="#C41E3A" title="Custom Accent Color" style="width:34px; height:34px; border:none; border-radius:50%; cursor:pointer; background:none;">
+            <div class="export-ctrl-row" style="display:flex; gap:12px;">
+              <div class="export-ctrl-group" style="flex:1;">
+                <label class="export-ctrl-label" for="exportGraphBgSelect">Background Style</label>
+                <select id="exportGraphBgSelect" class="admin-select" style="width:100%; padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); background:var(--bg-card); color:var(--text-main);">
+                  <option value="dark" selected>Deep Slate (#0B101C)</option>
+                  <option value="charcoal">Charcoal Studio (#1E293B)</option>
+                  <option value="light">Pristine White (#FFFFFF)</option>
+                </select>
+              </div>
+              <div class="export-ctrl-group" style="flex:1;">
+                <label class="export-ctrl-label" for="exportGraphStyleSelect">Graph Style</label>
+                <select id="exportGraphStyleSelect" class="admin-select" style="width:100%; padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); background:var(--bg-card); color:var(--text-main);">
+                  <option value="area" selected>Smooth Spline Area</option>
+                  <option value="bar">Industrial Bar Columns</option>
+                  <option value="line">Direct Line</option>
+                  <option value="stepped">Stepped Levels</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="export-ctrl-row" style="display:flex; gap:12px;">
+              <div class="export-ctrl-group" style="flex:1;">
+                <label class="export-ctrl-label" for="exportGraphResolutionSelect">Export Quality & DPI</label>
+                <select id="exportGraphResolutionSelect" class="admin-select" style="width:100%; padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); background:var(--bg-card); color:var(--text-main);">
+                  <option value="1">Standard HD (1600 × 900)</option>
+                  <option value="1.5" selected>2K High-Res (2400 × 1350)</option>
+                  <option value="2">4K Ultra Print (3200 × 1800)</option>
+                </select>
               </div>
             </div>
           </div>
 
-          <div class="export-ctrl-row" style="display:flex; gap:12px;">
-            <div class="export-ctrl-group" style="flex:1;">
-              <label class="export-ctrl-label" for="exportGraphBgSelect">Background Style</label>
-              <select id="exportGraphBgSelect" class="admin-select" style="width:100%; padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); background:var(--bg-card); color:var(--text-main);">
-                <option value="dark" selected>Deep Slate (#0B101C)</option>
-                <option value="charcoal">Charcoal Studio (#1E293B)</option>
-                <option value="light">Pristine White (#FFFFFF)</option>
-              </select>
-            </div>
-            <div class="export-ctrl-group" style="flex:1;">
-              <label class="export-ctrl-label" for="exportGraphStyleSelect">Graph Style</label>
-              <select id="exportGraphStyleSelect" class="admin-select" style="width:100%; padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); background:var(--bg-card); color:var(--text-main);">
-                <option value="area" selected>Smooth Spline Area</option>
-                <option value="bar">Industrial Bar Columns</option>
-                <option value="line">Direct Line</option>
-                <option value="stepped">Stepped Levels</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="export-ctrl-row" style="display:flex; gap:12px;">
-            <div class="export-ctrl-group" style="flex:1;">
-              <label class="export-ctrl-label" for="exportGraphResolutionSelect">Export Quality & DPI</label>
-              <select id="exportGraphResolutionSelect" class="admin-select" style="width:100%; padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); background:var(--bg-card); color:var(--text-main);">
-                <option value="1">Standard HD (1600 × 900)</option>
-                <option value="1.5" selected>2K High-Res (2400 × 1350)</option>
-                <option value="2">4K Ultra Print (3200 × 1800)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="export-ctrl-group">
-            <label class="export-ctrl-label">Include Infographic Details:</label>
-            <div class="export-checkbox-grid">
-              <label class="export-checkbox-item">
-                <input type="checkbox" id="exportOptKpi" checked> Metric KPI Cards (Visitors, Inquiries, Models)
+          <div class="export-control-card" style="display:flex; flex-direction:column; gap:10px; background:rgba(255,255,255,0.02); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px;">
+            <label class="export-ctrl-label">Include Infographic Elements:</label>
+            <div class="export-checkbox-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <label class="export-checkbox-item" style="display:flex; align-items:center; gap:8px; font-size:0.8rem; cursor:pointer;">
+                <input type="checkbox" id="exportOptKpi" checked> Metric KPI Summary Cards
               </label>
-              <label class="export-checkbox-item">
-                <input type="checkbox" id="exportOptGrid" checked> Coordinate Grid & Axis Values
+              <label class="export-checkbox-item" style="display:flex; align-items:center; gap:8px; font-size:0.8rem; cursor:pointer;">
+                <input type="checkbox" id="exportOptGrid" checked> Coordinate Grid & Numbers
               </label>
-              <label class="export-checkbox-item">
-                <input type="checkbox" id="exportOptWatermark" checked> Studio Watermark & Master Sign-Off
+              <label class="export-checkbox-item" style="display:flex; align-items:center; gap:8px; font-size:0.8rem; cursor:pointer;">
+                <input type="checkbox" id="exportOptWatermark" checked> Studio Watermark Seal
               </label>
-              <label class="export-checkbox-item">
-                <input type="checkbox" id="exportOptTimestamp" checked> Live Date & Time Stamp
+              <label class="export-checkbox-item" style="display:flex; align-items:center; gap:8px; font-size:0.8rem; cursor:pointer;">
+                <input type="checkbox" id="exportOptTimestamp" checked> Live Date/Time Stamp
               </label>
             </div>
           </div>
 
-          <div class="export-action-row" style="margin-top:16px;">
-            <button type="button" class="btn-primary btn-bloat" id="btnDownloadGraphJpeg" style="width:100%; padding:12px 20px; font-size:0.95rem;">
-              <span>💾 Download Overpowered JPEG</span>
+          <div class="export-action-row" style="margin-top:6px;">
+            <button type="button" class="btn-primary btn-bloat" id="btnDownloadGraphJpeg" style="width:100%; padding:14px 20px; font-size:0.95rem; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Download High-Resolution Infographic JPEG</span>
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PC ONLY RESTRICTION MODAL -->
+  <div class="admin-modal" id="pcOnlyModal">
+    <div class="admin-modal-dialog" style="max-width:460px; text-align:center; padding:32px 24px;">
+      <div style="width:60px; height:60px; border-radius:50%; background:rgba(196, 30, 58, 0.12); color:var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; border:1px solid rgba(196, 30, 58, 0.25);">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+      </div>
+      <h3 style="font-size:1.25rem; margin-bottom:10px; font-weight:700;">Desktop Computer Required</h3>
+      <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.55; margin-bottom:22px;">
+        Full studio operational tools (including Analytics, Media Showcase &amp; Uploads, Inquiries Inbox, Staff Access, and Studio Settings) are exclusively accessible on PC or desktop computers.<br><br>On mobile devices, only <strong>Client Reviews &amp; Testimonials</strong> moderation is enabled.
+      </p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button type="button" class="btn-primary" id="btnStayOnFeedbackModal" style="width:100%; justify-content:center; padding:12px 18px;">
+          <span>Moderate Client Reviews</span>
+        </button>
+        <button type="button" class="btn-secondary" id="btnClosePcOnlyModal" style="width:100%; justify-content:center; padding:10px 18px;">
+          <span>Dismiss</span>
+        </button>
       </div>
     </div>
   </div>

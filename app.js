@@ -35,6 +35,17 @@ const SafeStorage = {
   if (document.body) document.body.setAttribute('data-theme', saved);
 })();
 
+// --- CLEAN PRETTY URLS (STRIP .html EXTENSION ON HTTP/HTTPS SERVERS) ---
+(function initCleanUrls() {
+  try {
+    if (window.location.protocol.startsWith('http') && window.location.pathname.endsWith('.html')) {
+      const cleanPath = window.location.pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+      const newUrl = cleanPath + window.location.search + window.location.hash;
+      window.history.replaceState(null, '', newUrl);
+    }
+  } catch (e) {}
+})();
+
 // --- 1. THEME SWITCHER (Light / Dark) ---
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -480,92 +491,8 @@ function initCounters() {
     { id: 'CAT-dfa27f9e', name: '3D Printing', slug: '3d-printing', description: 'State-of-the-art SLA and FDM 3D printing services, rapid prototyping, and 3D scanning in Mumbai.' }
   ];
 
-  const DEFAULT_CLIENT_PROJECTS = [
-    {
-      id: 'PRJ-BLD-01',
-      title: 'Commercial High-Rise Tower & Retail Podium',
-      category: 'building-models',
-      categoryId: 'CAT-bdeb87f8',
-      categoryName: 'Building Models',
-      categorySlug: 'building-models',
-      description: 'Precision architectural scale model featuring CNC-milled acrylic curtain walls, dynamic interior floor lighting zones, landscaped public plaza, and illuminated podium canopy.',
-      mediaUrl: 'model_building.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_building.jpg', caption: 'Front Elevation & Podium Plaza' }, { url: 'model_architectural.jpg', caption: 'Masterplan Context View' }],
-      client: 'Lodha Group Mumbai',
-      createdAt: '2026-03-12T10:00:00.000Z'
-    },
-    {
-      id: 'PRJ-PLT-02',
-      title: 'Petrochemical Refinery & Industrial Complex',
-      category: 'plant-models',
-      categoryId: 'CAT-79ebe2f6',
-      categoryName: 'Plant Models',
-      categorySlug: 'plant-models',
-      description: 'Comprehensive industrial refinery scale model including distillation towers, color-coded process piping networks, tank farms, cooling stacks, and structural steel truss walkways.',
-      mediaUrl: 'model_plant.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_plant.jpg', caption: 'Full Complex Process Layout' }],
-      client: 'Reliance Industries / BPCL',
-      createdAt: '2026-03-05T14:30:00.000Z'
-    },
-    {
-      id: 'PRJ-MCH-03',
-      title: 'Heavy Industry Turbine & Precision Power Train',
-      category: 'machine-models',
-      categoryId: 'CAT-6858a1c4',
-      categoryName: 'Machine Models',
-      categorySlug: 'machine-models',
-      description: 'Engineering cutaway demonstration model built with brass and laser-sintered polymer components showing rotor dynamics, internal bearing blocks, and mechanical drivetrain.',
-      mediaUrl: 'model_machine.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_machine.jpg', caption: 'Precision Internal Cutaway Detail' }],
-      client: 'Larsen & Toubro Heavy Engineering',
-      createdAt: '2026-02-20T11:15:00.000Z'
-    },
-    {
-      id: 'PRJ-MIN-04',
-      title: 'Themed Waterfront Resort & Island Diorama',
-      category: 'miniature-models',
-      categoryId: 'CAT-780e8f84',
-      categoryName: 'Miniature Models',
-      categorySlug: 'miniature-models',
-      description: 'Handcrafted scenic diorama utilizing crystal-clear epoxy water effects, botanical topography, handcrafted resort villas, ambient shoreline illumination, and scale maritime vessels.',
-      mediaUrl: 'model_miniature.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_miniature.jpg', caption: 'Waterfront Lagoon & Island Villas' }],
-      client: 'Oberoi Realty Hospitality',
-      createdAt: '2026-02-14T09:45:00.000Z'
-    },
-    {
-      id: 'PRJ-INT-05',
-      title: 'Bespoke Penthouse & Commercial Cutaway Interior',
-      category: 'building-models',
-      categoryId: 'CAT-bdeb87f8',
-      categoryName: 'Building Models',
-      categorySlug: 'building-models',
-      description: 'Fully furnished architectural interior model displaying scale modern furniture, textured flooring materials, ambient micro-LED downlighting, and spatial volume planning.',
-      mediaUrl: 'model_interior.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_interior.jpg', caption: 'Furnished Cutaway Interior Volume' }],
-      client: 'Piramal Realty Design Studio',
-      createdAt: '2026-01-08T15:10:00.000Z'
-    },
-    {
-      id: 'PRJ-ARC-06',
-      title: 'Civic Institutional University Campus Masterplan',
-      category: 'building-models',
-      categoryId: 'CAT-bdeb87f8',
-      categoryName: 'Building Models',
-      categorySlug: 'building-models',
-      description: 'Comprehensive 80-acre educational campus master plan featuring academic faculties, student housing complexes, sports infrastructure, solar array canopies, and perimeter transit roads.',
-      mediaUrl: 'model_architectural.jpg',
-      mediaType: 'image',
-      images: [{ url: 'model_architectural.jpg', caption: 'Institutional Masterplan Overview' }],
-      client: 'IIT Bombay Infrastructure Division',
-      createdAt: '2025-12-18T10:30:00.000Z'
-    }
-  ];
+  // Studio Gallery Projects (Empty by default: user adds manually via Admin Panel or Google Sheets)
+  const DEFAULT_CLIENT_PROJECTS = [];
 
   function showGallerySkeletons(count = 6) {
     if (!galleryGrid) return;
@@ -609,6 +536,103 @@ function initCounters() {
     if (!allItems) return 0;
     if (filterId === 'all') return allItems.length;
     return allItems.filter(item => matchesCategory(item, filterId)).length;
+  }
+
+    function showPublicToast(message, type = 'info') {
+    let toast = document.getElementById('publicStudioToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'publicStudioToast';
+      toast.style.position = 'fixed';
+      toast.style.bottom = '28px';
+      toast.style.left = '50%';
+      toast.style.transform = 'translateX(-50%) translateY(20px)';
+      toast.style.opacity = '0';
+      toast.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+      toast.style.zIndex = '999999';
+      toast.style.display = 'flex';
+      toast.style.alignItems = 'center';
+      toast.style.gap = '10px';
+      toast.style.padding = '12px 22px';
+      toast.style.borderRadius = '50px';
+      toast.style.fontSize = '0.88rem';
+      toast.style.fontWeight = '500';
+      toast.style.boxShadow = '0 12px 36px rgba(0,0,0,0.45)';
+      toast.style.backdropFilter = 'blur(12px)';
+      toast.style.pointerEvents = 'none';
+      document.body.appendChild(toast);
+    }
+
+    const isSuccess = type === 'success';
+    toast.style.background = isSuccess ? 'rgba(6, 78, 59, 0.42)' : 'rgba(15, 23, 42, 0.42)';
+    toast.style.border = isSuccess ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.14)';
+    toast.style.backdropFilter = 'blur(24px) saturate(180%)';
+    toast.style.webkitBackdropFilter = 'blur(24px) saturate(180%)';
+    toast.style.color = isSuccess ? '#34D399' : '#FFFFFF';
+
+    toast.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        ${isSuccess ? '<polyline points="20 6 9 17 4 12"></polyline>' : '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'}
+      </svg>
+      <span>${message}</span>
+    `;
+
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+    });
+
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(20px)';
+    }, 3200);
+  }
+
+  function getRequestedProjectId() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const queryPrj = params.get('project') || params.get('id');
+      const hashPrj = (window.location.hash && window.location.hash.startsWith('#project-'))
+        ? window.location.hash.replace('#project-', '').trim()
+        : null;
+      return (queryPrj || hashPrj || '').trim();
+    } catch (e) {
+      return '';
+    }
+  }
+
+  let deepLinkHandledId = null;
+
+  function resolveAndOpenDeepLink(items) {
+    const target = getRequestedProjectId();
+    if (!target || !Array.isArray(items) || items.length === 0) return false;
+    if (deepLinkHandledId === target && lightboxModal && lightboxModal.classList.contains('active')) return true;
+
+    const targetLower = target.toLowerCase();
+    const targetClean = targetLower.replace(/^prj-/, '');
+
+    const matchIdx = items.findIndex(p => {
+      if (!p) return false;
+      const pId = String(p.id || '').toLowerCase();
+      const pClean = pId.replace(/^prj-/, '');
+      if (pId === targetLower || pClean === targetClean) return true;
+      if (p.driveFileId && String(p.driveFileId).toLowerCase() === targetLower) return true;
+      if (p.title) {
+        const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        if (slug === targetLower) return true;
+      }
+      return false;
+    });
+
+    if (matchIdx !== -1) {
+      deepLinkHandledId = target;
+      setTimeout(() => {
+        openLightbox(items, matchIdx);
+      }, 150);
+      return true;
+    }
+    return false;
   }
 
   async function loadGallery() {
@@ -657,6 +681,7 @@ function initCounters() {
     currentGalleryData = { categories: cats, items: localItems };
     renderGalleryFilterTabs(cats);
     renderGalleryItems(activeCategoryFilter, activeSearchQuery);
+    resolveAndOpenDeepLink(localItems);
 
     // Fetch from dual Google Sheets API in background
     try {
@@ -693,6 +718,7 @@ function initCounters() {
           mergedItems.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
           SafeStorage.set('emm_projects', JSON.stringify(mergedItems));
           currentGalleryData = { categories: cats, items: mergedItems };
+          resolveAndOpenDeepLink(mergedItems);
         } else {
           currentGalleryData = { categories: cats, items: localItems };
         }
@@ -858,7 +884,7 @@ function initCounters() {
     const banner = document.getElementById('categoryDescriptionBanner');
     if (!banner) return;
     if (cat && cat.description) {
-      banner.innerHTML = `<strong>✨ ${cat.name}:</strong> ${cat.description}`;
+      banner.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px; font-weight:700; color:var(--primary);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path></svg>${cat.name}:</span> ${cat.description}`;
       banner.classList.add('visible');
     } else {
       banner.classList.remove('visible');
@@ -916,29 +942,33 @@ function initCounters() {
     if (itemsToDisplay.length === 0) {
       if (allItems.length === 0) {
         galleryGrid.innerHTML = `
-          <div class="gallery-empty-state" style="padding: 60px 20px; text-align: center; grid-column: 1 / -1;">
-            <div class="gallery-empty-icon" style="font-size: 3rem; margin-bottom: 12px;">🏛️</div>
-            <h3 style="font-size: 1.4rem; margin-bottom: 8px;">Studio Portfolio Catalog</h3>
-            <p style="color: var(--text-muted); max-width: 540px; margin: 0 auto 20px; line-height: 1.6;">
-              Our master architectural and engineering scale models are currently being curated and updated. For custom model commissions, project specifications, or immediate portfolio viewings, please contact our Byculla studio.
+          <div class="gallery-empty-state" style="padding: 64px 24px; text-align: center; grid-column: 1 / -1; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-subtle); box-shadow: var(--shadow-sm);">
+            <div style="width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%; background: rgba(196, 30, 58, 0.08); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </div>
+            <h3 style="font-size: 1.35rem; margin-bottom: 8px; font-weight: 700; color: var(--text-main);">Studio Portfolio Updating</h3>
+            <p style="color: var(--text-muted); max-width: 520px; margin: 0 auto 22px; font-size: 0.94rem; line-height: 1.65;">
+              Our master architectural and engineering scale models are currently being cataloged. For custom commissions, material samples, or immediate portfolio review, contact our Mumbai studio.
             </p>
             <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-              <a href="contact.html" class="btn-primary btn-bloat" style="padding: 10px 24px; text-decoration: none;">
-                <span>Inquire With Studio ➔</span>
+              <a href="contact.html" class="btn-primary" style="padding: 10px 24px; text-decoration: none;">
+                <span>Inquire With Studio &rarr;</span>
               </a>
               <a href="models.html" class="btn-secondary" style="padding: 10px 24px; text-decoration: none;">
-                Explore Model Types
+                Explore Model Specifications
               </a>
             </div>
           </div>
         `;
       } else {
         galleryGrid.innerHTML = `
-          <div class="gallery-empty-state" style="grid-column: 1 / -1;">
-            <div class="gallery-empty-icon">🔍</div>
-            <h3>No Scale Models Found</h3>
-            <p>No project models match your current filter or search criteria. Try clearing the search or choosing another category.</p>
-            <button type="button" class="btn-primary" style="margin-top:10px; padding:8px 20px;" onclick="document.getElementById('gallerySearchClear')?.click(); document.querySelector('.filter-tab')?.click();">
+          <div class="gallery-empty-state" style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle);">
+            <div style="width: 44px; height: 44px; margin: 0 auto 12px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <h3 style="font-size: 1.2rem; margin-bottom: 6px;">No Scale Models Found</h3>
+            <p style="color: var(--text-muted); font-size: 0.92rem; max-width: 440px; margin: 0 auto 14px;">No project models match your current filter or search query. Try clearing filters to inspect all projects.</p>
+            <button type="button" class="btn-secondary" style="padding: 8px 18px; font-size: 0.85rem;" onclick="document.getElementById('gallerySearchClear')?.click(); document.querySelector('.filter-tab')?.click();">
               Show All Models
             </button>
           </div>
@@ -994,10 +1024,15 @@ function initCounters() {
             <span class="gallery-card-meta">
               <span>📍</span> Mumbai Studio
             </span>
-            <span class="gallery-card-cta">
-              <span>Inspect</span>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-left:3px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-            </span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" class="btn-card-share" title="Share Project Direct Link" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); cursor:pointer; padding:5px 8px; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; transition:all 0.2s;" onclick="event.stopPropagation(); window.shareProjectDirect('${item.id}');">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              </button>
+              <span class="gallery-card-cta">
+                <span>Inspect</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-left:3px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </span>
+            </div>
           </div>
         </div>
       `;
@@ -1018,6 +1053,13 @@ function initCounters() {
   let currentLightboxIndex = 0;
   let currentLightboxImageIndex = 0;
   let currentLightboxZoom = 1.0;
+  let panX = 0;
+  let panY = 0;
+  let isPanning = false;
+  let panStartX = 0;
+  let panStartY = 0;
+  let isGridActive = false;
+  let lastTapTime = 0;
 
   const lightboxModal = document.getElementById('lightboxModal');
   const lightboxMedia = document.getElementById('lightboxMedia');
@@ -1033,17 +1075,50 @@ function initCounters() {
   const lightboxZoomReset = document.getElementById('lightboxZoomReset');
   const lightboxFullscreen = document.getElementById('lightboxFullscreen');
   const lightboxShareBtn = document.getElementById('lightboxShareBtn');
+  const lightboxGridToggle = document.getElementById('lightboxGridToggle');
+  const lightboxZoomReadout = document.getElementById('lightboxZoomReadout');
 
-  function applyLightboxZoom(zoom) {
-    currentLightboxZoom = Math.min(3.0, Math.max(1.0, zoom));
+  function updateLightboxTransform() {
     const activeImg = lightboxMedia ? lightboxMedia.querySelector('img, video') : null;
     if (activeImg) {
-      activeImg.style.transform = `scale(${currentLightboxZoom})`;
+      if (currentLightboxZoom <= 1.0) {
+        panX = 0;
+        panY = 0;
+      }
+      activeImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentLightboxZoom})`;
       if (currentLightboxZoom > 1.0) {
         lightboxMedia.classList.add('zoomed');
       } else {
         lightboxMedia.classList.remove('zoomed');
       }
+    }
+    if (lightboxZoomReadout) {
+      lightboxZoomReadout.textContent = `${Math.round(currentLightboxZoom * 100)}%`;
+    }
+  }
+
+  function applyLightboxZoom(zoom) {
+    currentLightboxZoom = Math.min(3.5, Math.max(1.0, Math.round(zoom * 10) / 10));
+    updateLightboxTransform();
+  }
+
+  function resetLightboxPanAndZoom() {
+    currentLightboxZoom = 1.0;
+    panX = 0;
+    panY = 0;
+    isPanning = false;
+    updateLightboxTransform();
+  }
+
+  function syncLightboxUrl() {
+    const item = lightboxItems[currentLightboxIndex];
+    if (item && item.id) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('project', item.id);
+        if (url.hash.startsWith('#project-')) url.hash = '';
+        window.history.replaceState({ project: item.id }, item.title || document.title, url.toString());
+      } catch (e) {}
     }
   }
 
@@ -1052,20 +1127,30 @@ function initCounters() {
     lightboxItems = items;
     currentLightboxIndex = index;
     currentLightboxImageIndex = 0;
-    applyLightboxZoom(1.0);
+    resetLightboxPanAndZoom();
     updateLightboxContent();
     lightboxModal.classList.add('active');
     document.body.style.overflow = 'hidden';
+    syncLightboxUrl();
   }
 
   function closeLightbox() {
     if (!lightboxModal) return;
     lightboxModal.classList.remove('active');
-    applyLightboxZoom(1.0);
+    resetLightboxPanAndZoom();
     if (lightboxMedia) lightboxMedia.innerHTML = '';
     const strip = document.getElementById('lightboxGalleryStrip');
     if (strip) strip.innerHTML = '';
     document.body.style.overflow = '';
+
+    // Clear project parameter from URL bar
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('project');
+      url.searchParams.delete('id');
+      if (url.hash.startsWith('#project-')) url.hash = '';
+      window.history.replaceState({}, document.title, url.toString());
+    } catch (e) {}
   }
 
   function updateLightboxContent() {
@@ -1149,6 +1234,7 @@ function initCounters() {
       } else {
         lightboxMedia.innerHTML = `
           <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <div class="cad-grid-overlay" id="cadGridOverlay" style="display:${isGridActive ? 'block' : 'none'};"></div>
             <img src="${safeSrc}" alt="${(activeImgObj && activeImgObj.caption) || item.title}" referrerpolicy="no-referrer" onload="this.classList.add('loaded')" onerror="if(!this.dataset.retried){this.dataset.retried='1'; this.src='${driveFallback}';}else if(this.dataset.retried==='1'){this.dataset.retried='2'; this.src='${localFallback}';}else{this.src='hero_showcase.jpg';}; this.classList.add('loaded');" />
           </div>
         `;
@@ -1170,6 +1256,7 @@ function initCounters() {
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             currentLightboxImageIndex = parseInt(btn.getAttribute('data-img-idx'), 10);
+            resetLightboxPanAndZoom();
             updateLightboxContent();
           });
         });
@@ -1190,20 +1277,24 @@ function initCounters() {
       const waMsg = encodeURIComponent(`Hello Expressive Model Making, I am interested in this project from your gallery: "${item.title}". Could you share specifications and pricing?`);
       lightboxWhatsAppBtn.href = `https://api.whatsapp.com/send?phone=919819969376&text=${waMsg}`;
     }
+
+    resetLightboxPanAndZoom();
   }
 
   function nextLightbox() {
     currentLightboxIndex = (currentLightboxIndex + 1) % lightboxItems.length;
     currentLightboxImageIndex = 0;
-    applyLightboxZoom(1.0);
+    resetLightboxPanAndZoom();
     updateLightboxContent();
+    syncLightboxUrl();
   }
 
   function prevLightbox() {
     currentLightboxIndex = (currentLightboxIndex - 1 + lightboxItems.length) % lightboxItems.length;
     currentLightboxImageIndex = 0;
-    applyLightboxZoom(1.0);
+    resetLightboxPanAndZoom();
     updateLightboxContent();
+    syncLightboxUrl();
   }
 
   if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
@@ -1214,6 +1305,16 @@ function initCounters() {
   if (lightboxZoomIn) lightboxZoomIn.addEventListener('click', () => applyLightboxZoom(currentLightboxZoom + 0.4));
   if (lightboxZoomOut) lightboxZoomOut.addEventListener('click', () => applyLightboxZoom(currentLightboxZoom - 0.4));
   if (lightboxZoomReset) lightboxZoomReset.addEventListener('click', () => applyLightboxZoom(1.0));
+  
+  if (lightboxGridToggle) {
+    lightboxGridToggle.addEventListener('click', () => {
+      isGridActive = !isGridActive;
+      lightboxGridToggle.classList.toggle('active', isGridActive);
+      const grid = document.getElementById('cadGridOverlay');
+      if (grid) grid.style.display = isGridActive ? 'block' : 'none';
+    });
+  }
+
   if (lightboxFullscreen) {
     lightboxFullscreen.addEventListener('click', () => {
       if (!document.fullscreenElement) {
@@ -1223,22 +1324,76 @@ function initCounters() {
       }
     });
   }
+  function buildProjectShareUrl(item) {
+    if (!item) return window.location.href;
+    try {
+      if (window.location.protocol === 'file:') {
+        const base = window.location.href.split('?')[0].split('#')[0];
+        return `${base}?project=${encodeURIComponent(item.id)}`;
+      } else {
+        const cleanPath = window.location.pathname.replace(/\/index(\.html)?$/, '/gallery').replace(/\.html$/, '');
+        const targetPath = cleanPath.includes('gallery') ? cleanPath : (cleanPath.endsWith('/') ? cleanPath + 'gallery' : cleanPath + '/gallery');
+        return `${window.location.origin}${targetPath}?project=${encodeURIComponent(item.id)}`;
+      }
+    } catch (e) {
+      return window.location.origin + window.location.pathname + '?project=' + encodeURIComponent(item.id);
+    }
+  }
+
+  window.shareProjectDirect = function (projectId) {
+    const all = (currentGalleryData && currentGalleryData.items) || [];
+    const item = all.find(p => p.id === projectId) || { id: projectId, title: 'Scale Model Replica' };
+    const shareUrl = buildProjectShareUrl(item);
+
+    const shareData = {
+      title: item.title ? `${item.title} — Expressive Model Making` : 'Expressive Model Making Studio',
+      text: item.description ? `${item.description.slice(0, 160)}...` : 'Inspect this master physical scale model replica by Expressive Model Making Co., Mumbai.',
+      url: shareUrl
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(shareUrl).then(() => {
+            showPublicToast('Project direct link copied to clipboard!', 'success');
+          }).catch(() => {});
+        }
+      });
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showPublicToast('Project direct link copied to clipboard!', 'success');
+      }).catch(() => {
+        prompt('Copy project direct link:', shareUrl);
+      });
+    } else {
+      prompt('Copy project direct link:', shareUrl);
+    }
+  };
+
   if (lightboxShareBtn) {
     lightboxShareBtn.addEventListener('click', () => {
       const item = lightboxItems[currentLightboxIndex];
       if (!item) return;
-      const shareUrl = window.location.origin + window.location.pathname + '#project-' + item.id;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(shareUrl).then(() => {
-          alert(`📐 Project Direct Link Copied to Clipboard:\n\n${shareUrl}`);
-        }).catch(() => {
-          prompt('Copy project direct link:', shareUrl);
-        });
-      } else {
-        prompt('Copy project direct link:', shareUrl);
-      }
+      window.shareProjectDirect(item.id);
     });
   }
+
+  // Popstate & hashchange deep link listener
+  window.addEventListener('popstate', () => {
+    const target = getRequestedProjectId();
+    if (target && currentGalleryData.items && currentGalleryData.items.length > 0) {
+      resolveAndOpenDeepLink(currentGalleryData.items);
+    } else if (!target && lightboxModal && lightboxModal.classList.contains('active')) {
+      closeLightbox();
+    }
+  });
+
+  window.addEventListener('hashchange', () => {
+    const target = getRequestedProjectId();
+    if (target && currentGalleryData.items && currentGalleryData.items.length > 0) {
+      resolveAndOpenDeepLink(currentGalleryData.items);
+    }
+  });
 
   // Close on backdrop click
   if (lightboxModal) {
@@ -1247,15 +1402,87 @@ function initCounters() {
     });
   }
 
+  // --- PC & MOBILE PAN / DRAG / WHEEL / DOUBLE-TAP ZOOM HANDLERS ---
+  if (lightboxMedia) {
+    // Mouse drag panning
+    lightboxMedia.addEventListener('mousedown', (e) => {
+      if (currentLightboxZoom <= 1.0) return;
+      isPanning = true;
+      panStartX = e.clientX - panX;
+      panStartY = e.clientY - panY;
+      lightboxMedia.classList.add('grabbing');
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      panX = e.clientX - panStartX;
+      panY = e.clientY - panStartY;
+      updateLightboxTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isPanning) {
+        isPanning = false;
+        lightboxMedia.classList.remove('grabbing');
+      }
+    });
+
+    // Touch Panning & Double-Tap Zoom on Mobile
+    lightboxMedia.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const now = Date.now();
+        if (now - lastTapTime < 300) {
+          // Double Tap: Toggle Zoom
+          applyLightboxZoom(currentLightboxZoom > 1.0 ? 1.0 : 2.2);
+          lastTapTime = 0;
+          return;
+        }
+        lastTapTime = now;
+
+        if (currentLightboxZoom > 1.0) {
+          isPanning = true;
+          panStartX = touch.clientX - panX;
+          panStartY = touch.clientY - panY;
+        }
+      }
+    }, { passive: true });
+
+    lightboxMedia.addEventListener('touchmove', (e) => {
+      if (isPanning && e.touches.length === 1) {
+        const touch = e.touches[0];
+        panX = touch.clientX - panStartX;
+        panY = touch.clientY - panStartY;
+        updateLightboxTransform();
+      }
+    }, { passive: true });
+
+    lightboxMedia.addEventListener('touchend', () => {
+      isPanning = false;
+    });
+
+    // Mouse Wheel Zoom
+    lightboxMedia.addEventListener('wheel', (e) => {
+      if (!lightboxModal.classList.contains('active')) return;
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.25 : -0.25;
+      applyLightboxZoom(currentLightboxZoom + delta);
+    }, { passive: false });
+  }
+
   // Keyboard navigation & CAD shortcuts
   window.addEventListener('keydown', (e) => {
     if (!lightboxModal || !lightboxModal.classList.contains('active')) return;
     if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowRight') nextLightbox();
-    if (e.key === 'ArrowLeft') prevLightbox();
+    if (e.key === 'ArrowRight' && currentLightboxZoom <= 1.0) nextLightbox();
+    if (e.key === 'ArrowLeft' && currentLightboxZoom <= 1.0) prevLightbox();
     if (e.key === '+' || e.key === '=') applyLightboxZoom(currentLightboxZoom + 0.4);
     if (e.key === '-' || e.key === '_') applyLightboxZoom(currentLightboxZoom - 0.4);
     if (e.key === '0') applyLightboxZoom(1.0);
+    if (e.key.toLowerCase() === 'g') {
+      if (lightboxGridToggle) lightboxGridToggle.click();
+    }
     if (e.key.toLowerCase() === 'f') {
       if (!document.fullscreenElement) {
         if (lightboxModal && lightboxModal.requestFullscreen) lightboxModal.requestFullscreen();
@@ -1323,13 +1550,29 @@ function initCounters() {
     `).join('');
   }
 
-  // --- REAL VISIT LOGGING (FOR OCTOBER 2026 ANALYTICS) ---
+  // --- REAL VISIT LOGGING (FOR OCTOBER 2026+ ANALYTICS - DYNAMIC REAL TIME) ---
   (function trackRealVisit() {
     try {
-      const todayKey = '2026-10-15';
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const todayKey = `${yyyy}-${mm}-${dd}`;
       const visits = JSON.parse(SafeStorage.get('emm_pageviews_oct2026') || '{}');
       visits[todayKey] = (visits[todayKey] || 0) + 1;
       SafeStorage.set('emm_pageviews_oct2026', JSON.stringify(visits));
+
+      // Asynchronously log to Google Sheets Analytics without blocking page load
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (typeof API !== 'undefined' && API.request) {
+        API.request({
+          action: 'log_analytics',
+          eventType: 'pageview',
+          page: window.location.pathname.split('/').pop() || 'index.html',
+          device: isMobile ? 'mobile' : 'desktop',
+          userAgent: navigator.userAgent
+        }, 'POST').catch(() => {});
+      }
     } catch (e) {}
   })();
 
@@ -1424,7 +1667,9 @@ function initCounters() {
     if (!reviews || reviews.length === 0) {
       feedbackGrid.innerHTML = `
         <div class="feedback-empty-card" style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-subtle); box-shadow: var(--shadow-sm);">
-          <div style="font-size: 2.4rem; margin-bottom: 14px;">🤝</div>
+          <div style="width: 52px; height: 52px; margin: 0 auto 16px; border-radius: 50%; background: rgba(196, 30, 58, 0.08); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+          </div>
           <h3 style="font-size: 1.35rem; margin-bottom: 8px; color: var(--text-main);">No Reviews Published Yet</h3>
           <p style="color: var(--text-muted); max-width: 580px; margin: 0 auto 16px; font-size: 0.95rem; line-height: 1.6;">
             At Expressive Model Making Co., our architectural scale models and industrial plant commissions are completed through direct client consultations and developer partnerships across Mumbai.
@@ -1771,7 +2016,7 @@ function initCounters() {
         }
         closeBugModal();
         bugForm.reset();
-        alert('🙏 Thank you for your feedback!\n\nYour report has been dispatched to Mustafa Rampurawala and our studio engineering team. We review every issue with high priority.');
+        showPublicToast('Thank you! Your report has been dispatched to Mustafa Rampurawala and studio engineering.', 'success');
       });
     }
   }
