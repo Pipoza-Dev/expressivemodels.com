@@ -1,0 +1,8 @@
+# Clean URLs for Netlify and Cloudflare Pages
+/about    /about.html    200
+/models   /models.html   200
+/gallery  /gallery.html  200
+/process  /process.html  200
+/reviews  /reviews.html  200
+/contact  /contact.html  200
+/admin    /admin.html    200

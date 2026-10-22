@@ -1,0 +1,43 @@
+# ==============================================================================
+# EXPRESSIVE MODEL MAKING CO. — OFFICIAL APACHE / CPANEL URL REWRITE & SECURITY
+# Clean URLs (No .html Extension), Strict Security Headers & Compression
+# ==============================================================================
+
+# Disable directory listing
+Options -Indexes
+
+RewriteEngine On
+
+# 1. Block access to hidden files (dotfiles, .git, .env, backups, etc.)
+RewriteCond %{REQUEST_URI} !(^|/)\.well-known/ [NC]
+RewriteRule (^|/)\. - [F,L]
+
+# 2. Block access to sensitive file extensions
+<FilesMatch "\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist|env)$">
+  Order allow,deny
+  Deny from all
+</FilesMatch>
+
+# 3. Force Clean URLs (Redirect /page.html to /page)
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.html [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# 4. Internally route /page to /page.html without changing browser URL bar
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^([^\.]+)$ $1.html [NC,L]
+
+# 5. Enterprise-Grade Security & Anti-Hacking Headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header set Content-Security-Policy "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; media-src 'self' https: blob: data:; frame-src 'self' https://drive.google.com https://www.google.com; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https:;"
+</IfModule>
+
+# 6. High-Performance Gzip & Brotli Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
